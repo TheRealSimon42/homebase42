@@ -9,5 +9,8 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/TheRealSimon42/homebase42/issues",
   "requirements": [],
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "frontend": {
+    "entrypoint": "simon42-strategy/simon42-strategies-loader.js"
+  }
 }
