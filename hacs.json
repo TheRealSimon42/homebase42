@@ -1,0 +1,8 @@
+{
+  "name": "Homebase42",
+  "content_in_root": false,
+  "filename": "homebase42",
+  "country": ["DE"],
+  "render_readme": true,
+  "homeassistant": "2024.1.0"
+}
