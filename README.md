@@ -4,6 +4,28 @@
 
 Homebase42 ist eine umfassende Custom Integration für Home Assistant, die besonders Anfängern den Einstieg erleichtert und gleichzeitig fortgeschrittenen Nutzern mächtige Werkzeuge an die Hand gibt.
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=TheRealSimon42&repository=homebase42&category=integration)
+
+---
+
+## 💖 Unterstütze dieses Projekt
+
+Wenn dir Homebase42 hilft, unterstütze die Weiterentwicklung:
+
+<p align="center">
+  <a href="https://youtube.com/@simon42/join">
+    <img src="https://img.shields.io/badge/YouTube-Kanalmitglied_werden-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube Kanalmitglied werden" />
+  </a>
+  <br/>
+  <em>🫶 Bevorzugte Unterstützung: Werde Kanalmitglied auf YouTube!</em>
+  <br/><br/>
+  <a href="https://www.buymeacoffee.com/simon42official">
+    <img src="https://img.shields.io/badge/Buy_Me_A_Coffee-Spende_einen_Kaffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee" />
+  </a>
+</p>
+
+---
+
 ## ✨ Features
 
 ### 🎨 Intelligentes Dashboard (simon42-strategy)
