@@ -131,12 +131,29 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für Details zu Änderungen zwischen Versione
 
 ## 📄 Lizenz
 
-Dieses Projekt ist unter der MIT-Lizenz lizenziert - siehe [LICENSE](LICENSE) für Details.
+**Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**
+
+### Du darfst:
+- ✅ **Teilen** - Das Material kopieren und weiterverbreiten
+- ✅ **Bearbeiten** - Das Material remixen, verändern und darauf aufbauen
+
+### Unter folgenden Bedingungen:
+- 📝 **Namensnennung** - Angemessene Urheber-Nennung
+- 🚫 **Nicht kommerziell** - Keine kommerzielle Nutzung
+- 🔄 **Weitergabe unter gleichen Bedingungen** - Bei Veränderungen unter gleicher Lizenz
+
+### 💼 Kommerzielle Nutzung
+
+Interessiert an kommerzieller Nutzung? Kontaktiere mich für individuelle Lizenzvereinbarungen:
+
+**👉 [Kontaktformular](https://www.simon42.com/contact/)**
+
+**Siehe LICENSE-Datei für vollständige Details**
 
 ## 🙏 Danksagungen
 
-- Inspiriert von den Community-Bedürfnissen im Home Assistant Forum
-- Dank an alle Contributors und Tester
+- Home Assistant Community für Inspiration und Feedback
+- Alle Contributors und Tester
 - Besonderer Dank an die Home Assistant Core-Entwickler
 
 ## 💬 Support
