@@ -14,7 +14,6 @@ from homeassistant.helpers import config_validation as cv
 from .const import (
     DOMAIN,
     NAME,
-    CONF_ENABLE_ADMIN_FEATURES,
     CONF_BATTERY_CRITICAL_THRESHOLD,
     CONF_BATTERY_LOW_THRESHOLD,
     CONF_UNAVAILABLE_NOTIFICATION_DELAY,
@@ -48,10 +47,6 @@ class Homebase42ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Optional(
-                    CONF_ENABLE_ADMIN_FEATURES,
-                    default=False,
-                ): bool,
                 vol.Optional(
                     CONF_BATTERY_CRITICAL_THRESHOLD,
                     default=DEFAULT_BATTERY_CRITICAL,
@@ -99,10 +94,6 @@ class Homebase42OptionsFlow(config_entries.OptionsFlow):
 
         data_schema = vol.Schema(
             {
-                vol.Optional(
-                    CONF_ENABLE_ADMIN_FEATURES,
-                    default=options.get(CONF_ENABLE_ADMIN_FEATURES, False),
-                ): bool,
                 vol.Optional(
                     CONF_BATTERY_CRITICAL_THRESHOLD,
                     default=options.get(

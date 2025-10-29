@@ -5,13 +5,11 @@
         "title": "Homebase42 einrichten",
         "description": "Konfiguriere deine Homebase42 Einstellungen",
         "data": {
-          "enable_admin_features": "Admin-Features aktivieren",
           "battery_critical_threshold": "Kritischer Batteriestand (%)",
           "battery_low_threshold": "Niedriger Batteriestand (%)",
           "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)"
         },
         "data_description": {
-          "enable_admin_features": "Zeigt erweiterte Admin-Views im Dashboard an",
           "battery_critical_threshold": "Schwellwert ab dem Batterien als kritisch gemeldet werden",
           "battery_low_threshold": "Schwellwert ab dem Batterien als niedrig gemeldet werden",
           "unavailable_notification_delay": "Wartezeit bevor nicht verfügbare Entitäten gemeldet werden"
@@ -21,7 +19,6 @@
         "title": "Homebase42 Optionen",
         "description": "Passe deine Homebase42 Einstellungen an",
         "data": {
-          "enable_admin_features": "Admin-Features aktivieren",
           "battery_critical_threshold": "Kritischer Batteriestand (%)",
           "battery_low_threshold": "Niedriger Batteriestand (%)",
           "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)"

@@ -2,6 +2,7 @@
 // VIEW STRATEGY - BATTERIEN (Batterie-Übersicht) - OPTIMIERT
 // ====================================================================
 // KEIN unnötiges Map-Caching mehr - nutzt direkt hass.entities[entityId]
+// Liest Batterie-Schwellwerte aus der Homebase42-Integration
 // ====================================================================
 
 import { getExcludedLabels } from '../utils/simon42-helpers.js';
@@ -29,6 +30,23 @@ class Simon42ViewBatteriesStrategy {
       }
     }
 
+    // Lese Batterie-Schwellwerte aus der Homebase42-Integration
+    let criticalThreshold = 20; // Default
+    let lowThreshold = 50; // Default
+    
+    // Suche nach der Homebase42 Config Entry
+    const homebase42Entries = Object.values(hass.config_entries || {})
+      .filter(entry => entry.domain === 'homebase42');
+    
+    if (homebase42Entries.length > 0) {
+      const homebase42Entry = homebase42Entries[0];
+      const options = homebase42Entry.options || {};
+      
+      // Lese die konfigurierten Schwellwerte
+      criticalThreshold = options.battery_critical_threshold || 20;
+      lowThreshold = options.battery_low_threshold || 50;
+    }
+
     // OPTIMIERT: Filter-Reihenfolge - KEIN Map-Caching mehr!
     const batteryEntities = Object.keys(hass.states)
       .filter(entityId => {
@@ -53,18 +71,18 @@ class Simon42ViewBatteriesStrategy {
         return !isNaN(value); // Nur numerische Werte
       });
 
-    // Gruppiere nach Batteriestatus
-    const critical = []; // < 20%
-    const low = []; // 20-50%
-    const good = []; // > 50%
+    // Gruppiere nach Batteriestatus mit dynamischen Schwellwerten
+    const critical = []; // < criticalThreshold
+    const low = []; // criticalThreshold - lowThreshold
+    const good = []; // > lowThreshold
     
     batteryEntities.forEach(entityId => {
       const state = hass.states[entityId];
       const value = parseFloat(state.state);
       
-      if (value < 20) {
+      if (value <= criticalThreshold) {
         critical.push(entityId);
-      } else if (value <= 50) {
+      } else if (value <= lowThreshold) {
         low.push(entityId);
       } else {
         good.push(entityId);
@@ -80,7 +98,7 @@ class Simon42ViewBatteriesStrategy {
         cards: [
           {
             type: "heading",
-            heading: `🔴 Kritisch (< 20%) - ${critical.length} ${critical.length === 1 ? 'Batterie' : 'Batterien'}`,
+            heading: `🔴 Kritisch (≤ ${criticalThreshold}%) - ${critical.length} ${critical.length === 1 ? 'Batterie' : 'Batterien'}`,
             heading_style: "title"
           },
           ...critical.map(entity => ({
@@ -101,7 +119,7 @@ class Simon42ViewBatteriesStrategy {
         cards: [
           {
             type: "heading",
-            heading: `🟡 Niedrig (20-50%) - ${low.length} ${low.length === 1 ? 'Batterie' : 'Batterien'}`,
+            heading: `🟡 Niedrig (${criticalThreshold + 1}-${lowThreshold}%) - ${low.length} ${low.length === 1 ? 'Batterie' : 'Batterien'}`,
             heading_style: "title"
           },
           ...low.map(entity => ({
@@ -122,7 +140,7 @@ class Simon42ViewBatteriesStrategy {
         cards: [
           {
             type: "heading",
-            heading: `🟢 Gut (> 50%) - ${good.length} ${good.length === 1 ? 'Batterie' : 'Batterien'}`,
+            heading: `🟢 Gut (> ${lowThreshold}%) - ${good.length} ${good.length === 1 ? 'Batterie' : 'Batterien'}`,
             heading_style: "title"
           },
           ...good.map(entity => ({

@@ -3,7 +3,7 @@
 // ====================================================================
 // HTML-Template für den Dashboard Strategy Editor
 
-export function renderEditorHTML({ allAreas, hiddenAreas, areaOrder, showEnergy, showSubviews, showSearchCard, hasSearchCardDeps, summariesColumns, alarmEntity, alarmEntities, favoriteEntities, allEntities, groupByFloors }) {
+export function renderEditorHTML({ allAreas, hiddenAreas, areaOrder, showEnergy, showSubviews, showSearchCard, hasSearchCardDeps, summariesColumns, alarmEntity, alarmEntities, favoriteEntities, allEntities, groupByFloors, showAdminFeatures }) {
   return `
     <div class="card-config">
       <div class="section">
@@ -119,6 +119,21 @@ export function renderEditorHTML({ allAreas, hiddenAreas, areaOrder, showEnergy,
         </div>
         <div class="description">
           Zeigt die Unteransichten (Lichter, Rollos, Sicherheit, Batterien, Räume) in der oberen Navigation an.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Admin-Features</div>
+        <div class="form-row">
+          <input 
+            type="checkbox" 
+            id="show-admin-features" 
+            ${showAdminFeatures ? 'checked' : ''}
+          />
+          <label for="show-admin-features">Admin-Features anzeigen</label>
+        </div>
+        <div class="description">
+          Zeigt erweiterte Admin-Views im Dashboard an (z.B. erweiterte System-Informationen, erweiterte Konfigurationsmöglichkeiten).
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import {
   attachEnergyCheckboxListener,
   attachSearchCardCheckboxListener,
   attachSubviewsCheckboxListener,
+  attachAdminFeaturesCheckboxListener,  // NEU
   attachGroupByFloorsCheckboxListener, // NEU
   attachAreaCheckboxListeners,
   attachDragAndDropListeners,
@@ -62,6 +63,7 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     const showEnergy = this._config.show_energy !== false;
     const showSearchCard = this._config.show_search_card === true;
     const showSubviews = this._config.show_subviews === true;
+    const showAdminFeatures = this._config.show_admin_features === true; // NEU
     const groupByFloors = this._config.group_by_floors === true; // NEU
     const summariesColumns = this._config.summaries_columns || 2;
     const alarmEntity = this._config.alarm_entity || '';
@@ -106,7 +108,8 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
         alarmEntities,
         favoriteEntities,
         allEntities,
-        groupByFloors // NEU
+        groupByFloors,
+        showAdminFeatures  // NEU
       })}
     `;
 
@@ -114,6 +117,7 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     attachEnergyCheckboxListener(this, (showEnergy) => this._showEnergyChanged(showEnergy));
     attachSearchCardCheckboxListener(this, (showSearchCard) => this._showSearchCardChanged(showSearchCard));
     attachSubviewsCheckboxListener(this, (showSubviews) => this._showSubviewsChanged(showSubviews));
+    attachAdminFeaturesCheckboxListener(this, (showAdminFeatures) => this._showAdminFeaturesChanged(showAdminFeatures)); // NEU
     attachGroupByFloorsCheckboxListener(this, (groupByFloors) => this._groupByFloorsChanged(groupByFloors)); // NEU
     this._attachSummariesColumnsListener();
     this._attachAlarmEntityListener();
@@ -666,7 +670,25 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
+// Für Admin-Features anzeigen
+_showAdminFeaturesChanged(showAdminFeatures) {
+  if (!this._config || !this._hass) {
+    return;
+  }
 
+  const newConfig = {
+    ...this._config,
+    show_admin_features: showAdminFeatures
+  };
+
+  // Wenn der Standardwert (false) gesetzt ist, entfernen wir die Property
+  if (showAdminFeatures === false) {
+    delete newConfig.show_admin_features;
+  }
+
+  this._config = newConfig;
+  this._fireConfigChanged(newConfig);
+}
   _fireConfigChanged(config) {
     // Setze Flag, damit setConfig() nicht erneut rendert
     this._isUpdatingConfig = true;

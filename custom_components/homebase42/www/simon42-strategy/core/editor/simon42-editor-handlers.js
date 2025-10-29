@@ -32,6 +32,15 @@ export function attachSubviewsCheckboxListener(element, callback) {
   }
 }
 
+export function attachAdminFeaturesCheckboxListener(element, callback) {
+  const adminFeaturesCheckbox = element.querySelector('#show-admin-features');
+  if (adminFeaturesCheckbox) {
+    adminFeaturesCheckbox.addEventListener('change', (e) => {
+      callback(e.target.checked);
+    });
+  }
+}
+
 export function attachGroupByFloorsCheckboxListener(element, callback) {
   const groupByFloorsCheckbox = element.querySelector('#group-by-floors');
   if (groupByFloorsCheckbox) {
@@ -65,44 +74,70 @@ export function attachExpandButtonListeners(element, hass, config, onEntitiesLoa
   expandButtons.forEach(button => {
     button.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const areaId = button.dataset.areaId;
-      const areaItem = button.closest('.area-item');
-      const content = areaItem.querySelector(`.area-content[data-area-id="${areaId}"]`);
-      const icon = button.querySelector('.expand-icon');
       
-      if (content.style.display === 'none') {
-        // Expand
-        content.style.display = 'block';
-        button.classList.add('expanded');
-        
-        // Track expanded state
-        if (element._expandedAreas) {
-          element._expandedAreas.add(areaId);
-        }
-        
-        // Lade Entitäten, falls noch nicht geladen
-        if (content.querySelector('.loading-placeholder')) {
-          const groupedEntities = await getAreaGroupedEntities(areaId, hass);
-          const hiddenEntities = getHiddenEntitiesForArea(areaId, config);
-          const entityOrders = getEntityOrdersForArea(areaId, config);
-          
-          const entitiesHTML = renderAreaEntitiesHTML(areaId, groupedEntities, hiddenEntities, entityOrders, hass);
-          content.innerHTML = entitiesHTML;
-          
-          // Attach listeners für die neuen Entity-Checkboxen
-          attachEntityCheckboxListeners(content, onEntitiesLoad);
-          attachGroupCheckboxListeners(content, onEntitiesLoad);
-          attachEntityExpandButtonListeners(content, element);
-        }
-      } else {
+      const areaId = button.dataset.areaId;
+      const areaContent = element.querySelector(`.area-content[data-area-id="${areaId}"]`);
+      const expandIcon = button.querySelector('.expand-icon');
+      
+      if (!areaContent) return;
+      
+      const isExpanded = areaContent.style.display !== 'none';
+      
+      if (isExpanded) {
         // Collapse
-        content.style.display = 'none';
-        button.classList.remove('expanded');
+        areaContent.style.display = 'none';
+        expandIcon.style.transform = 'rotate(0deg)';
+      } else {
+        // Expand
+        areaContent.style.display = 'block';
+        expandIcon.style.transform = 'rotate(90deg)';
         
-        // Track collapsed state
-        if (element._expandedAreas) {
-          element._expandedAreas.delete(areaId);
-          element._expandedGroups?.delete(areaId);
+        // Lade Entitäten wenn noch nicht geladen
+        if (areaContent.querySelector('.loading-placeholder')) {
+          try {
+            // Import data collectors
+            const { getAllEntitiesForArea, groupEntitiesByDomain } = await import('../data/simon42-data-collectors.js');
+            
+            // Sammle Entities für diesen Bereich
+            const areaEntities = getAllEntitiesForArea(areaId, hass);
+            const groupedEntities = groupEntitiesByDomain(areaEntities, hass);
+            
+            // Hole hidden entities aus config
+            const areaConfig = config.areas_options?.[areaId] || {};
+            const groupsOptions = areaConfig.groups_options || {};
+            
+            const hiddenEntities = {};
+            Object.keys(groupsOptions).forEach(group => {
+              hiddenEntities[group] = groupsOptions[group].hidden || [];
+            });
+            
+            const entityOrders = {};
+            Object.keys(groupsOptions).forEach(group => {
+              entityOrders[group] = groupsOptions[group].order || [];
+            });
+            
+            // Render Entities
+            areaContent.innerHTML = renderAreaEntitiesHTML(
+              areaId,
+              groupedEntities,
+              hiddenEntities,
+              entityOrders,
+              hass
+            );
+            
+            // Attach listeners für Group Checkboxen
+            attachGroupCheckboxListeners(element, onEntitiesLoad);
+            
+            // Attach listeners für Entity Checkboxen
+            attachEntityCheckboxListeners(element, onEntitiesLoad);
+            
+            // Attach listeners für Entity Expand Buttons
+            attachEntityExpandButtonListeners(element, element);
+            
+          } catch (error) {
+            console.error('Error loading entities for area:', error);
+            areaContent.innerHTML = '<div class="error-state">Fehler beim Laden der Entitäten</div>';
+          }
         }
       }
     });
@@ -113,17 +148,13 @@ export function attachGroupCheckboxListeners(element, callback) {
   const groupCheckboxes = element.querySelectorAll('.group-checkbox');
   
   groupCheckboxes.forEach(checkbox => {
-    // Set indeterminate state
-    if (checkbox.dataset.indeterminate === 'true') {
-      checkbox.indeterminate = true;
-    }
-    
     checkbox.addEventListener('change', (e) => {
       const areaId = e.target.dataset.areaId;
       const group = e.target.dataset.group;
       const isVisible = e.target.checked;
       
-      callback(areaId, group, null, isVisible); // null = alle Entities in der Gruppe
+      // null für entityId bedeutet: alle Entities in der Gruppe
+      callback(areaId, group, null, isVisible);
       
       // Update alle Entity-Checkboxen in dieser Gruppe
       const entityList = element.querySelector(`.entity-list[data-area-id="${areaId}"][data-group="${group}"]`);
@@ -185,37 +216,81 @@ export function attachEntityExpandButtonListeners(element, editorElement) {
   expandButtons.forEach(button => {
     button.addEventListener('click', (e) => {
       e.stopPropagation();
+      
       const areaId = button.dataset.areaId;
       const group = button.dataset.group;
       const entityList = element.querySelector(`.entity-list[data-area-id="${areaId}"][data-group="${group}"]`);
+      const expandIcon = button.querySelector('.expand-icon-small');
       
-      if (entityList) {
-        if (entityList.style.display === 'none') {
-          entityList.style.display = 'block';
-          button.classList.add('expanded');
-          
-          // Track expanded state
-          if (editorElement._expandedGroups) {
-            if (!editorElement._expandedGroups.has(areaId)) {
-              editorElement._expandedGroups.set(areaId, new Set());
-            }
-            editorElement._expandedGroups.get(areaId).add(group);
-          }
-        } else {
-          entityList.style.display = 'none';
-          button.classList.remove('expanded');
-          
-          // Track collapsed state
-          if (editorElement._expandedGroups) {
-            const areaGroups = editorElement._expandedGroups.get(areaId);
-            if (areaGroups) {
-              areaGroups.delete(group);
-            }
-          }
-        }
+      if (!entityList) return;
+      
+      const isExpanded = entityList.style.display !== 'none';
+      
+      if (isExpanded) {
+        // Collapse
+        entityList.style.display = 'none';
+        expandIcon.style.transform = 'rotate(0deg)';
+      } else {
+        // Expand
+        entityList.style.display = 'block';
+        expandIcon.style.transform = 'rotate(90deg)';
       }
     });
   });
+}
+
+export function attachDragAndDropListeners(element, onOrderChange) {
+  const areaList = element.querySelector('#area-list');
+  if (!areaList) return;
+
+  let draggedItem = null;
+
+  areaList.addEventListener('dragstart', (e) => {
+    if (e.target.classList.contains('drag-handle')) {
+      draggedItem = e.target.closest('.area-item');
+      draggedItem.style.opacity = '0.5';
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  });
+
+  areaList.addEventListener('dragend', (e) => {
+    if (draggedItem) {
+      draggedItem.style.opacity = '1';
+      draggedItem = null;
+    }
+  });
+
+  areaList.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    const afterElement = getDragAfterElement(areaList, e.clientY);
+    if (afterElement == null) {
+      areaList.appendChild(draggedItem);
+    } else {
+      areaList.insertBefore(draggedItem, afterElement);
+    }
+  });
+
+  areaList.addEventListener('drop', (e) => {
+    e.preventDefault();
+    onOrderChange();
+  });
+}
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.area-item:not(.dragging)')];
+
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 export function sortAreaItems(element) {
@@ -230,224 +305,4 @@ export function sortAreaItems(element) {
   });
 
   items.forEach(item => areaList.appendChild(item));
-}
-
-export function attachDragAndDropListeners(element, onOrderChange) {
-  const areaList = element.querySelector('#area-list');
-  if (!areaList) return;
-  
-  const areaItems = areaList.querySelectorAll('.area-item');
-  
-  let draggedElement = null;
-
-  const handleDragStart = (ev) => {
-    // Nur auf dem Header draggable machen
-    const dragHandle = ev.target.closest('.drag-handle');
-    if (!dragHandle) {
-      ev.preventDefault();
-      return;
-    }
-    
-    const areaItem = ev.target.closest('.area-item');
-    if (!areaItem) {
-      ev.preventDefault();
-      return;
-    }
-    
-    areaItem.classList.add('dragging');
-    ev.dataTransfer.effectAllowed = 'move';
-    ev.dataTransfer.setData('text/html', areaItem.innerHTML);
-    draggedElement = areaItem;
-  };
-
-  const handleDragEnd = (ev) => {
-    const areaItem = ev.target.closest('.area-item');
-    if (areaItem) {
-      areaItem.classList.remove('dragging');
-    }
-    
-    // Entferne alle drag-over Klassen
-    const items = areaList.querySelectorAll('.area-item');
-    items.forEach(item => item.classList.remove('drag-over'));
-  };
-
-  const handleDragOver = (ev) => {
-    if (ev.preventDefault) {
-      ev.preventDefault();
-    }
-    ev.dataTransfer.dropEffect = 'move';
-    
-    const item = ev.currentTarget;
-    if (item !== draggedElement) {
-      item.classList.add('drag-over');
-    }
-    
-    return false;
-  };
-
-  const handleDragLeave = (ev) => {
-    ev.currentTarget.classList.remove('drag-over');
-  };
-
-  const handleDrop = (ev) => {
-    if (ev.stopPropagation) {
-      ev.stopPropagation();
-    }
-    if (ev.preventDefault) {
-      ev.preventDefault();
-    }
-
-    const dropTarget = ev.currentTarget;
-    dropTarget.classList.remove('drag-over');
-
-    if (draggedElement && draggedElement !== dropTarget) {
-      const allItems = Array.from(areaList.querySelectorAll('.area-item'));
-      const draggedIndex = allItems.indexOf(draggedElement);
-      const dropIndex = allItems.indexOf(dropTarget);
-
-      if (draggedIndex < dropIndex) {
-        dropTarget.parentNode.insertBefore(draggedElement, dropTarget.nextSibling);
-      } else {
-        dropTarget.parentNode.insertBefore(draggedElement, dropTarget);
-      }
-
-      // Update die Reihenfolge in der Config
-      onOrderChange();
-    }
-
-    return false;
-  };
-
-  areaItems.forEach(item => {
-    item.setAttribute('draggable', 'true');
-    item.addEventListener('dragstart', handleDragStart);
-    item.addEventListener('dragend', handleDragEnd);
-    item.addEventListener('dragover', handleDragOver);
-    item.addEventListener('drop', handleDrop);
-    item.addEventListener('dragleave', handleDragLeave);
-  });
-}
-
-// Helper-Funktionen
-
-async function getAreaGroupedEntities(areaId, hass) {
-  // NEUES CACHING: Nutze hass.devices und hass.entities (Standard Home Assistant Objects)
-  // Keine WebSocket-Calls mehr nötig!
-  
-  // Konvertiere Objects zu Arrays
-  const devices = Object.values(hass.devices || {});
-  const entities = Object.values(hass.entities || {});
-  
-  // Finde alle Geräte im Raum
-  const areaDevices = new Set();
-  for (const device of devices) {
-    if (device.area_id === areaId) {
-      areaDevices.add(device.id);
-    }
-  }
-  
-  // Gruppiere Entitäten
-  const roomEntities = {
-    lights: [],
-    covers: [],
-    covers_curtain: [],
-    scenes: [],
-    climate: [],
-    media_player: [],
-    vacuum: [],
-    fan: [],
-    switches: []
-  };
-  
-  // Labels für Filterung
-  const excludeLabels = entities
-    .filter(e => e.labels?.includes("no_dboard"))
-    .map(e => e.entity_id);
-  
-  for (const entity of entities) {
-    // Prüfe ob Entität zum Raum gehört
-    let belongsToArea = false;
-    
-    if (entity.area_id) {
-      belongsToArea = entity.area_id === areaId;
-    } else if (entity.device_id && areaDevices.has(entity.device_id)) {
-      belongsToArea = true;
-    }
-    
-    if (!belongsToArea) continue;
-    if (excludeLabels.includes(entity.entity_id)) continue;
-    if (!hass.states[entity.entity_id]) continue;
-    if (entity.hidden_by || entity.disabled_by) continue;
-    
-    const entityRegistry = hass.entities?.[entity.entity_id];
-    if (entityRegistry && (entityRegistry.hidden_by || entityRegistry.disabled_by)) continue;
-    
-    const domain = entity.entity_id.split('.')[0];
-    const state = hass.states[entity.entity_id];
-    const deviceClass = state.attributes?.device_class;
-    
-    // Kategorisiere nach Domain
-    if (domain === 'light') {
-      roomEntities.lights.push(entity.entity_id);
-    } 
-    else if (domain === 'cover') {
-      if (deviceClass === 'curtain' || deviceClass === 'blind') {
-        roomEntities.covers_curtain.push(entity.entity_id);
-      } else {
-        roomEntities.covers.push(entity.entity_id);
-      }
-    }
-    else if (domain === 'scene') {
-      roomEntities.scenes.push(entity.entity_id);
-    }
-    else if (domain === 'climate') {
-      roomEntities.climate.push(entity.entity_id);
-    }
-    else if (domain === 'media_player') {
-      roomEntities.media_player.push(entity.entity_id);
-    }
-    else if (domain === 'vacuum') {
-      roomEntities.vacuum.push(entity.entity_id);
-    }
-    else if (domain === 'fan') {
-      roomEntities.fan.push(entity.entity_id);
-    }
-    else if (domain === 'switch') {
-      roomEntities.switches.push(entity.entity_id);
-    }
-  }
-  
-  return roomEntities;
-}
-
-function getHiddenEntitiesForArea(areaId, config) {
-  const areaOptions = config.areas_options?.[areaId];
-  if (!areaOptions || !areaOptions.groups_options) {
-    return {};
-  }
-  
-  const hidden = {};
-  for (const [group, options] of Object.entries(areaOptions.groups_options)) {
-    if (options.hidden) {
-      hidden[group] = options.hidden;
-    }
-  }
-  
-  return hidden;
-}
-
-function getEntityOrdersForArea(areaId, config) {
-  const areaOptions = config.areas_options?.[areaId];
-  if (!areaOptions || !areaOptions.groups_options) {
-    return {};
-  }
-  
-  const orders = {};
-  for (const [group, options] of Object.entries(areaOptions.groups_options)) {
-    if (options.order) {
-      orders[group] = options.order;
-    }
-  }
-  
-  return orders;
 }
