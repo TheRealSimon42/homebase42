@@ -1,25 +1,34 @@
 """Sensor platform for Homebase42."""
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.util import dt as dt_util
 
 from .const import (
     DOMAIN,
+    NAME,
     CONF_BATTERY_CRITICAL_THRESHOLD,
     CONF_BATTERY_LOW_THRESHOLD,
+    CONF_UNAVAILABLE_NOTIFICATION_DELAY,
     DEFAULT_BATTERY_CRITICAL,
     DEFAULT_BATTERY_LOW,
+    DEFAULT_UNAVAILABLE_DELAY,
+    ATTR_ENTITIES,
+    ATTR_LAST_UPDATED,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -46,6 +55,7 @@ class Homebase42UnavailableCountSensor(SensorEntity, RestoreEntity):
     """Sensor for counting unavailable entities."""
 
     _attr_has_entity_name = True
+    _attr_translation_key = "unavailable_count"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:counter"
     _attr_native_unit_of_measurement = "entities"
@@ -55,8 +65,15 @@ class Homebase42UnavailableCountSensor(SensorEntity, RestoreEntity):
         self.hass = hass
         self._entry = entry
         self._attr_unique_id = f"{entry.entry_id}_unavailable_count"
-        self._attr_name = "Anzahl nicht verfügbarer Entitäten"
         self._attr_native_value = 0
+        self._unavailable_entities: list[str] = []
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=NAME,
+            manufacturer="Simon42",
+            model="Homebase42",
+            sw_version="0.1.0",
+        )
 
     async def async_added_to_hass(self) -> None:
         """Handle entity added to hass."""
@@ -68,6 +85,8 @@ class Homebase42UnavailableCountSensor(SensorEntity, RestoreEntity):
                 self._attr_native_value = int(last_state.state)
             except (ValueError, TypeError):
                 self._attr_native_value = 0
+            if last_state.attributes.get(ATTR_ENTITIES):
+                self._unavailable_entities = last_state.attributes[ATTR_ENTITIES]
         
         # Set up periodic update
         self.async_on_remove(
@@ -84,33 +103,45 @@ class Homebase42UnavailableCountSensor(SensorEntity, RestoreEntity):
     @callback
     async def _async_update(self, now=None) -> None:
         """Update the sensor."""
-        count = 0
+        unavailable_entities = []
+        delay_hours = self._entry.options.get(
+            CONF_UNAVAILABLE_NOTIFICATION_DELAY, DEFAULT_UNAVAILABLE_DELAY
+        )
+        delay = timedelta(hours=delay_hours)
+        now_time = dt_util.utcnow()
         
-        # Get all entities from the registry
-        entity_registry = self.hass.helpers.entity_registry.async_get(self.hass)
-        
-        for entity_id, entity in entity_registry.entities.items():
-            # Skip disabled entities
-            if entity.disabled:
+        # Iterate through all entities
+        for state in self.hass.states.async_all():
+            # Skip entities from this integration
+            if state.entity_id.startswith(f"binary_sensor.{DOMAIN}_") or \
+               state.entity_id.startswith(f"sensor.{DOMAIN}_"):
                 continue
             
-            # Skip config/diagnostic entities
-            if entity.entity_category:
-                continue
-            
-            # Check if entity is unavailable in states
-            state = self.hass.states.get(entity_id)
-            if state and state.state == "unavailable":
-                count += 1
+            # Check if entity is unavailable
+            if state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN):
+                # Check if it has been unavailable for long enough
+                if state.last_changed and (now_time - state.last_changed) >= delay:
+                    unavailable_entities.append(state.entity_id)
         
-        self._attr_native_value = count
+        self._unavailable_entities = unavailable_entities
+        self._attr_native_value = len(unavailable_entities)
+        
         self.async_write_ha_state()
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return additional attributes."""
+        return {
+            ATTR_ENTITIES: self._unavailable_entities,
+            ATTR_LAST_UPDATED: dt_util.utcnow().isoformat(),
+        }
 
 
 class Homebase42BatteryLowCountSensor(SensorEntity, RestoreEntity):
     """Sensor for counting low battery entities."""
 
     _attr_has_entity_name = True
+    _attr_translation_key = "battery_low_count"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:battery-low"
     _attr_native_unit_of_measurement = "entities"
@@ -120,8 +151,15 @@ class Homebase42BatteryLowCountSensor(SensorEntity, RestoreEntity):
         self.hass = hass
         self._entry = entry
         self._attr_unique_id = f"{entry.entry_id}_battery_low_count"
-        self._attr_name = "Anzahl Batterien mit niedrigem Stand"
         self._attr_native_value = 0
+        self._low_batteries: list[str] = []
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=NAME,
+            manufacturer="Simon42",
+            model="Homebase42",
+            sw_version="0.1.0",
+        )
 
     async def async_added_to_hass(self) -> None:
         """Handle entity added to hass."""
@@ -133,6 +171,8 @@ class Homebase42BatteryLowCountSensor(SensorEntity, RestoreEntity):
                 self._attr_native_value = int(last_state.state)
             except (ValueError, TypeError):
                 self._attr_native_value = 0
+            if last_state.attributes.get(ATTR_ENTITIES):
+                self._low_batteries = last_state.attributes[ATTR_ENTITIES]
         
         # Set up periodic update
         self.async_on_remove(
@@ -149,39 +189,39 @@ class Homebase42BatteryLowCountSensor(SensorEntity, RestoreEntity):
     @callback
     async def _async_update(self, now=None) -> None:
         """Update the sensor."""
-        count = 0
-        critical_threshold = self._entry.options.get(
-            CONF_BATTERY_CRITICAL_THRESHOLD, DEFAULT_BATTERY_CRITICAL
-        )
+        low_batteries = []
         low_threshold = self._entry.options.get(
             CONF_BATTERY_LOW_THRESHOLD, DEFAULT_BATTERY_LOW
         )
+        critical_threshold = self._entry.options.get(
+            CONF_BATTERY_CRITICAL_THRESHOLD, DEFAULT_BATTERY_CRITICAL
+        )
         
-        # Get all battery entities
-        entity_registry = self.hass.helpers.entity_registry.async_get(self.hass)
-        
-        for entity_id, entity in entity_registry.entities.items():
-            # Skip disabled entities
-            if entity.disabled:
-                continue
-            
-            # Check for battery entities
-            if not (
-                entity.device_class == "battery"
-                or entity.original_device_class == "battery"
-                or "battery" in entity_id.lower()
-            ):
-                continue
-            
-            # Check battery level (low but not critical)
-            state = self.hass.states.get(entity_id)
-            if state and state.state not in ("unavailable", "unknown"):
+        # Iterate through all sensor entities
+        for state in self.hass.states.async_all("sensor"):
+            # Check if it's a battery sensor
+            if state.attributes.get("device_class") == "battery":
                 try:
-                    level = float(state.state)
-                    if critical_threshold < level <= low_threshold:
-                        count += 1
+                    battery_level = float(state.state)
+                    # Count batteries that are low but not critical
+                    if critical_threshold < battery_level <= low_threshold and state.state not in (
+                        STATE_UNAVAILABLE,
+                        STATE_UNKNOWN,
+                    ):
+                        low_batteries.append(state.entity_id)
                 except (ValueError, TypeError):
+                    # Skip entities with non-numeric battery levels
                     continue
         
-        self._attr_native_value = count
+        self._low_batteries = low_batteries
+        self._attr_native_value = len(low_batteries)
+        
         self.async_write_ha_state()
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return additional attributes."""
+        return {
+            ATTR_ENTITIES: self._low_batteries,
+            ATTR_LAST_UPDATED: dt_util.utcnow().isoformat(),
+        }

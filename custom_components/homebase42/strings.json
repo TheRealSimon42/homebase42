@@ -3,42 +3,50 @@
     "step": {
       "user": {
         "title": "Homebase42 einrichten",
-        "description": "Konfiguriere deine Homebase42 Integration - deine zentrale Anlaufstelle für ein besseres Home Assistant Erlebnis.",
+        "description": "Konfiguriere deine Homebase42 Einstellungen",
         "data": {
           "enable_admin_features": "Admin-Features aktivieren",
           "battery_critical_threshold": "Kritischer Batteriestand (%)",
           "battery_low_threshold": "Niedriger Batteriestand (%)",
-          "unavailable_notification_delay": "Verzögerung für Unavailable-Benachrichtigungen (Stunden)"
+          "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)"
         },
         "data_description": {
-          "enable_admin_features": "Zeigt zusätzliche Admin-Views wie nicht verfügbare Entitäten und System-Performance.",
-          "battery_critical_threshold": "Batteriestand unter diesem Wert wird als kritisch eingestuft.",
-          "battery_low_threshold": "Batteriestand unter diesem Wert wird als niedrig eingestuft.",
-          "unavailable_notification_delay": "Wie lange eine Entität nicht verfügbar sein muss, bevor eine Benachrichtigung ausgelöst wird."
+          "enable_admin_features": "Zeigt erweiterte Admin-Views im Dashboard an",
+          "battery_critical_threshold": "Schwellwert ab dem Batterien als kritisch gemeldet werden",
+          "battery_low_threshold": "Schwellwert ab dem Batterien als niedrig gemeldet werden",
+          "unavailable_notification_delay": "Wartezeit bevor nicht verfügbare Entitäten gemeldet werden"
+        }
+      },
+      "init": {
+        "title": "Homebase42 Optionen",
+        "description": "Passe deine Homebase42 Einstellungen an",
+        "data": {
+          "enable_admin_features": "Admin-Features aktivieren",
+          "battery_critical_threshold": "Kritischer Batteriestand (%)",
+          "battery_low_threshold": "Niedriger Batteriestand (%)",
+          "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)"
         }
       }
     },
     "abort": {
-      "single_instance_allowed": "Es ist nur eine Instanz von Homebase42 erlaubt."
+      "single_instance_allowed": "Es kann nur eine Instanz von Homebase42 konfiguriert werden"
     }
   },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Homebase42 Optionen",
-        "description": "Passe die Einstellungen für Homebase42 an.",
-        "data": {
-          "enable_admin_features": "Admin-Features aktivieren",
-          "battery_critical_threshold": "Kritischer Batteriestand (%)",
-          "battery_low_threshold": "Niedriger Batteriestand (%)",
-          "unavailable_notification_delay": "Verzögerung für Unavailable-Benachrichtigungen (Stunden)"
-        },
-        "data_description": {
-          "enable_admin_features": "Zeigt zusätzliche Admin-Views wie nicht verfügbare Entitäten und System-Performance.",
-          "battery_critical_threshold": "Batteriestand unter diesem Wert wird als kritisch eingestuft.",
-          "battery_low_threshold": "Batteriestand unter diesem Wert wird als niedrig eingestuft.",
-          "unavailable_notification_delay": "Wie lange eine Entität nicht verfügbar sein muss, bevor eine Benachrichtigung ausgelöst wird."
-        }
+  "entity": {
+    "binary_sensor": {
+      "unavailable_entities": {
+        "name": "Nicht verfügbare Entitäten"
+      },
+      "battery_critical": {
+        "name": "Kritische Batteriestände"
+      }
+    },
+    "sensor": {
+      "unavailable_count": {
+        "name": "Anzahl nicht verfügbarer Entitäten"
+      },
+      "battery_low_count": {
+        "name": "Anzahl niedriger Batteriestände"
       }
     }
   }

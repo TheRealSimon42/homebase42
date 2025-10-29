@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Homebase42",
+        "description": "Configure your Homebase42 settings",
+        "data": {
+          "enable_admin_features": "Enable admin features",
+          "battery_critical_threshold": "Critical battery level (%)",
+          "battery_low_threshold": "Low battery level (%)",
+          "unavailable_notification_delay": "Notification delay (hours)"
+        },
+        "data_description": {
+          "enable_admin_features": "Shows advanced admin views in the dashboard",
+          "battery_critical_threshold": "Threshold at which batteries are reported as critical",
+          "battery_low_threshold": "Threshold at which batteries are reported as low",
+          "unavailable_notification_delay": "Wait time before unavailable entities are reported"
+        }
+      },
+      "init": {
+        "title": "Homebase42 Options",
+        "description": "Adjust your Homebase42 settings",
+        "data": {
+          "enable_admin_features": "Enable admin features",
+          "battery_critical_threshold": "Critical battery level (%)",
+          "battery_low_threshold": "Low battery level (%)",
+          "unavailable_notification_delay": "Notification delay (hours)"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Only one instance of Homebase42 can be configured"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "unavailable_entities": {
+        "name": "Unavailable entities"
+      },
+      "battery_critical": {
+        "name": "Critical battery levels"
+      }
+    },
+    "sensor": {
+      "unavailable_count": {
+        "name": "Unavailable entity count"
+      },
+      "battery_low_count": {
+        "name": "Low battery count"
+      }
+    }
+  }
+}
