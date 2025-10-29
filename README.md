@@ -39,7 +39,7 @@ Homebase42 ist eine umfassende Custom Integration für Home Assistant, die beson
 2. Gehe zu **Integrationen**
 3. Klicke auf das Menü (⋮) oben rechts
 4. Wähle **Benutzerdefinierte Repositories**
-5. Füge die URL hinzu: `https://github.com/DEIN-USERNAME/homebase42`
+5. Füge die URL hinzu: `https://github.com/TheRealSimon42/homebase42`
 6. Kategorie: **Integration**
 7. Klicke auf **Hinzufügen**
 8. Suche nach "Homebase42" und installiere es
@@ -141,7 +141,7 @@ Dieses Projekt ist unter der MIT-Lizenz lizenziert - siehe [LICENSE](LICENSE) f�
 
 ## 💬 Support
 
-- **Probleme?** Öffne ein [Issue](https://github.com/DEIN-USERNAME/homebase42/issues)
+- **Probleme?** Öffne ein [Issue](https://github.com/TheRealSimon42/homebase42/issues)
 - **Fragen?** Diskutiere im [Home Assistant Community Forum](https://community.home-assistant.io/)
 - **Updates?** Folge dem Repository für die neuesten Änderungen
 

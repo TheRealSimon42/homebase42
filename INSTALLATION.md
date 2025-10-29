@@ -13,7 +13,7 @@
    - Gehe zu **Integrationen**
    - Klicke auf das Menü (⋮) oben rechts
    - Wähle **Benutzerdefinierte Repositories**
-   - URL: `https://github.com/DEIN-USERNAME/homebase42`
+   - URL: `https://github.com/TheRealSimon42/homebase42`
    - Kategorie: **Integration**
    - Klicke auf **Hinzufügen**
 
@@ -182,7 +182,7 @@ ImportError: cannot import name 'X'
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/DEIN-USERNAME/homebase42/issues)
+- **Issues**: [GitHub Issues](https://github.com/TheRealSimon42/homebase42/issues)
 - **Forum**: [Home Assistant Community](https://community.home-assistant.io/)
 - **Logs**: Aktiviere Debug-Logging in `configuration.yaml`:
 

@@ -1,13 +1,13 @@
 {
   "domain": "homebase42",
   "name": "Homebase42",
-  "codeowners": ["@simon42"],
+  "codeowners": ["@TheRealSimon42"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/simon42/homebase42",
+  "documentation": "https://github.com/TheRealSimon42/homebase42",
   "integration_type": "hub",
   "iot_class": "calculated",
-  "issue_tracker": "https://github.com/simon42/homebase42/issues",
+  "issue_tracker": "https://github.com/TheRealSimon42/homebase42/issues",
   "requirements": [],
   "version": "0.1.0"
 }

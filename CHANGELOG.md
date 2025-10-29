@@ -35,5 +35,5 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Blueprints noch nicht verfügbar
 - Englische Übersetzungen fehlen noch
 
-[Unreleased]: https://github.com/DEIN-USERNAME/homebase42/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/DEIN-USERNAME/homebase42/releases/tag/v0.1.0
+[Unreleased]: https://github.com/TheRealSimon42/homebase42/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/TheRealSimon42/homebase42/releases/tag/v0.1.0
