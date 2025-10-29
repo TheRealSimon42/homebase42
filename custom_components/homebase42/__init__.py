@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -32,11 +33,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     integration = await async_get_integration(hass, DOMAIN)
     
     # Register static path for strategy files
-    hass.http.register_static_path(
-        f"/hacsfiles/{DOMAIN}",
-        str(integration.file_path / "www"),
-        cache_headers=False,
-    )
+    await hass.http.async_register_static_paths([
+        StaticPathConfig(
+            f"/hacsfiles/{DOMAIN}",
+            str(integration.file_path / "www"),
+            False,
+        )
+    ])
     
     _LOGGER.info("Homebase42 dashboard strategy registered at /hacsfiles/%s/", DOMAIN)
     
