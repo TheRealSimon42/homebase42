@@ -1,3 +1,7 @@
+# UNDER CONSTRUCTION 🚨 - KEIN SUPPORT; KEIN GARNIX
+
+## Falls du das neue Dashboard suchst: https://www.simon42.com/home-assistant-dashboards/
+
 # Homebase42 🏠🚀
 
 **Deine zentrale Anlaufstelle für einen besseren Start in Home Assistant**
