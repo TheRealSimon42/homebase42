@@ -22,3 +22,7 @@ __pycache__/
 # Temporary files
 *.tmp
 *.bak
+
+# Local development config (contains credentials)
+.dev_config
+deploy_to_test.sh

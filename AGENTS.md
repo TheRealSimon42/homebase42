@@ -1,7 +1,38 @@
 # Agent Guide for Homebase42
 
 ## Project Overview
-This is a Home Assistant custom integration for monitoring entities and battery levels. It follows Home Assistant's integration architecture standards.
+This is a Home Assistant custom integration for distributing best pratices, templates and automations by simon42 (i.e. monitoring entities and battery levels). It follows Home Assistant's integration architecture standards and is available via HACS (https://github.com/TheRealSimon42/homebase42).
+
+## Environment
+This repository is located locally on the development machine. For testing changes to the custom component, files can be automatically synced to a Home Assistant test system.
+
+### Test System Configuration
+- **Test System URL**: See `.dev_config` file
+- **Sync Details**: See `.dev_config` file (not in git, contains credentials)
+- **Important**: Changes to files outside `custom_components/homebase42/` (e.g., `hacs.json`) require manual deployment
+
+### Automatic Deployment to Test System
+When changes are made to files in `custom_components/homebase42/`, use the deployment script to sync them to the test system.
+
+**Deployment Script**: `./deploy_to_test.sh`
+- Reads configuration from `.dev_config` 
+- Mounts SMB share temporarily via IP (no permanent mount needed)
+- Copies all files from `custom_components/homebase42/` to test system
+- Automatically cleans up mount point after deployment
+- Shows summary of deployed files
+
+**Usage**: After making changes to the custom component, run:
+```bash
+./deploy_to_test.sh
+```
+
+Then restart Home Assistant on the test system to load the changes.
+
+## Git Repository
+- Remote alias: `hb42`
+- Branch: `main`
+- Repository: https://github.com/TheRealSimon42/homebase42
+- **Note**: Always ask for confirmation before pushing, as changes need to be tested first
 
 ## Build/Test Commands
 No formal test suite currently exists. Manual testing requires:
