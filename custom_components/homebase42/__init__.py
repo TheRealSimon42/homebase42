@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import issue_registry as ir
 
 from .const import (
     DOMAIN,
@@ -19,6 +20,7 @@ from .const import (
     OPTIONAL_TEMPLATES,
     CONF_WEATHER_ENTITY,
     DEFAULT_WEATHER_ENTITY,
+    REPAIR_RESTART_REQUIRED,
 )
 
 if TYPE_CHECKING:
@@ -104,8 +106,11 @@ async def _async_copy_blueprints(hass: HomeAssistant, entry: ConfigEntry) -> Non
     await hass.async_add_executor_job(_copy_blueprints_sync, hass, entry)
 
 
-def _copy_templates_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Copy templates to the packages folder based on configuration (sync version)."""
+def _copy_templates_sync(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Copy templates to the packages folder based on configuration (sync version).
+    
+    Returns True if templates were changed (added/removed/updated), False otherwise.
+    """
     # Source: integration templates folder
     templates_dir = Path(__file__).parent / "templates"
     
@@ -114,7 +119,9 @@ def _copy_templates_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
     
     if not templates_dir.exists():
         _LOGGER.debug("Templates folder not found in integration")
-        return
+        return False
+    
+    templates_changed = False
     
     try:
         # Get options from config entry
@@ -145,6 +152,7 @@ def _copy_templates_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
                         if not dest_file.exists() or dest_file.read_text() != content:
                             dest_file.write_text(content)
                             _LOGGER.info("Copied optional template: %s (using %s)", template_filename, weather_entity)
+                            templates_changed = True
                         else:
                             _LOGGER.debug("Optional template already up to date: %s", template_filename)
                 else:
@@ -153,6 +161,7 @@ def _copy_templates_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
                     if dest_file.exists():
                         dest_file.unlink()
                         _LOGGER.info("Removed disabled optional template: %s", template_filename)
+                        templates_changed = True
                         
                         # Remove directory if empty
                         if dest_dir.exists() and not any(dest_dir.iterdir()):
@@ -161,11 +170,17 @@ def _copy_templates_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
                 
     except Exception as err:
         _LOGGER.error("Failed to manage templates: %s", err)
+        return False
+    
+    return templates_changed
 
 
-async def _async_copy_templates(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Copy templates to the packages folder based on configuration."""
-    await hass.async_add_executor_job(_copy_templates_sync, hass, entry)
+async def _async_copy_templates(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Copy templates to the packages folder based on configuration.
+    
+    Returns True if templates were changed, False otherwise.
+    """
+    return await hass.async_add_executor_job(_copy_templates_sync, hass, entry)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -176,7 +191,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await _async_copy_blueprints(hass, entry)
     
     # Copy templates to user's packages folder
-    await _async_copy_templates(hass, entry)
+    templates_changed = await _async_copy_templates(hass, entry)
+    
+    # If templates were changed, create a repair issue to notify user about restart
+    if templates_changed:
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            REPAIR_RESTART_REQUIRED,
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="restart_required_templates",
+        )
+    else:
+        # Remove repair issue if it exists (templates are up to date)
+        ir.async_delete_issue(hass, DOMAIN, REPAIR_RESTART_REQUIRED)
     
     # Register update listener for options changes
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))

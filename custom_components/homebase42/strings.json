@@ -86,6 +86,12 @@
       "single_instance_allowed": "Es kann nur eine Instanz von Homebase42 konfiguriert werden"
     }
   },
+  "issues": {
+    "restart_required_templates": {
+      "title": "Neustart erforderlich",
+      "description": "Die Wetter-Template-Konfiguration wurde geändert. Bitte starte Home Assistant neu, damit die neuen Packages geladen werden."
+    }
+  },
   "entity": {
     "binary_sensor": {
       "unavailable_entities": {

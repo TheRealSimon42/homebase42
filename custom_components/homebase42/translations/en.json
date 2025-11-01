@@ -86,6 +86,12 @@
       "single_instance_allowed": "Only one instance of Homebase42 can be configured"
     }
   },
+  "issues": {
+    "restart_required_templates": {
+      "title": "Restart required",
+      "description": "The weather template configuration has been changed. Please restart Home Assistant to load the new packages."
+    }
+  },
   "entity": {
     "binary_sensor": {
       "unavailable_entities": {

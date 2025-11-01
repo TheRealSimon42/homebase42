@@ -52,3 +52,6 @@ OPTIONAL_BLUEPRINTS = {
 OPTIONAL_TEMPLATES = {
     "s42_weather_forecasts.yaml": CONF_TEMPLATE_WEATHER,
 }
+
+# Repair issues
+REPAIR_RESTART_REQUIRED = "restart_required_templates"
