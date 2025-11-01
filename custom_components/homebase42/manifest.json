@@ -9,9 +9,5 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/TheRealSimon42/homebase42/issues",
   "requirements": [],
-  "version": "0.1.0",
-  "blueprints": [
-    "blueprints/s42_unavailable_notification.yaml",
-    "blueprints/s42_persistent_notification_to_mobile.yaml"
-  ]
+  "version": "0.1.0"
 }
