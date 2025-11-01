@@ -1,0 +1,26 @@
+blueprint:
+  name: s42 Persistente Benachrichtigung an Mobile
+  description: Sende persistente Benachrichtigungen an die Mobile App, wenn sie hinzugefügt, aktualisiert oder entfernt werden
+  domain: automation
+  input:
+    mobile_app_target:
+      name: Mobile App Ziel
+      description: Der Mobile App Benachrichtigungsdienst, an den gesendet werden soll
+      selector:
+        target:
+          entity:
+            domain: notify
+
+trigger:
+  - platform: persistent_notification
+    update_type:
+      - added
+      - updated
+      - removed
+
+action:
+  - service: notify.notify
+    target: !input mobile_app_target
+    data:
+      title: "{{ trigger.notification.title }}"
+      message: "{{ trigger.notification.message }}"
