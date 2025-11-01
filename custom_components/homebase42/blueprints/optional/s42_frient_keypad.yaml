@@ -1,0 +1,656 @@
+blueprint:
+  name: Frient Keypad Code-Steuerung (MQTT)
+  description: >
+    Führt Aktionen basierend auf eingegebenem Code und Keypad-Taste aus.
+    Unterstützt alle Tasten des Frient Keypads (disarm, arm_all_zones, arm_day_zones, arm_night_zones, emergency).
+    
+    WICHTIG: Codes und Aktionen müssen in der Automation selbst konfiguriert werden. Diese Blueprint liefert das Framework.
+  domain: automation
+  source_url: https://github.com/yourusername/homebase42
+  input:
+    mqtt_topic:
+      name: MQTT Topic
+      description: Das MQTT Topic des Frient Keypads (z.B. zigbee2mqtt/frient Keypad)
+      selector:
+        text:
+    
+    disarm_codes:
+      name: "DISARM - Codes"
+      description: "Liste von gültigen Codes für die DISARM-Taste (Schloss offen). Format: Komma-getrennt, z.B. '1234,5678'"
+      default: ""
+      selector:
+        text:
+    
+    disarm_actions:
+      name: "DISARM - Aktionen"
+      description: "Aktionen die ausgeführt werden sollen, wenn ein gültiger DISARM-Code eingegeben wurde"
+      default: []
+      selector:
+        action:
+    
+    disarm_delay_seconds:
+      name: "DISARM - Entry Delay (Sekunden)"
+      description: "Wie lange soll das Keypad piepen bevor die Aktionen ausgeführt werden?"
+      default: 3
+      selector:
+        number:
+          min: 0
+          max: 60
+          unit_of_measurement: "s"
+    
+    disarm_notification:
+      name: "DISARM - Benachrichtigung erstellen"
+      description: "Soll eine Benachrichtigung erstellt werden?"
+      default: true
+      selector:
+        boolean:
+    
+    arm_all_codes:
+      name: "ARM ALL ZONES - Codes"
+      description: "Liste von gültigen Codes für die ARM ALL ZONES-Taste (Schloss geschlossen). Format: Komma-getrennt"
+      default: ""
+      selector:
+        text:
+    
+    arm_all_actions:
+      name: "ARM ALL ZONES - Aktionen"
+      description: "Aktionen die ausgeführt werden sollen, wenn ein gültiger ARM ALL ZONES-Code eingegeben wurde"
+      default: []
+      selector:
+        action:
+    
+    arm_all_delay_seconds:
+      name: "ARM ALL ZONES - Exit Delay (Sekunden)"
+      description: "Wie lange soll das Keypad piepen bevor die Aktionen ausgeführt werden?"
+      default: 3
+      selector:
+        number:
+          min: 0
+          max: 60
+          unit_of_measurement: "s"
+    
+    arm_all_notification:
+      name: "ARM ALL ZONES - Benachrichtigung erstellen"
+      description: "Soll eine Benachrichtigung erstellt werden?"
+      default: true
+      selector:
+        boolean:
+    
+    arm_day_codes:
+      name: "ARM DAY ZONES - Codes"
+      description: "Liste von gültigen Codes für die ARM DAY ZONES-Taste (Haus). Format: Komma-getrennt"
+      default: ""
+      selector:
+        text:
+    
+    arm_day_actions:
+      name: "ARM DAY ZONES - Aktionen"
+      description: "Aktionen die ausgeführt werden sollen, wenn ein gültiger ARM DAY ZONES-Code eingegeben wurde"
+      default: []
+      selector:
+        action:
+    
+    arm_day_delay_seconds:
+      name: "ARM DAY ZONES - Exit Delay (Sekunden)"
+      description: "Wie lange soll das Keypad piepen bevor die Aktionen ausgeführt werden?"
+      default: 3
+      selector:
+        number:
+          min: 0
+          max: 60
+          unit_of_measurement: "s"
+    
+    arm_day_notification:
+      name: "ARM DAY ZONES - Benachrichtigung erstellen"
+      description: "Soll eine Benachrichtigung erstellt werden?"
+      default: true
+      selector:
+        boolean:
+    
+    arm_night_codes:
+      name: "ARM NIGHT ZONES - Codes"
+      description: "Liste von gültigen Codes für die ARM NIGHT ZONES-Taste (Mond). Format: Komma-getrennt"
+      default: ""
+      selector:
+        text:
+    
+    arm_night_actions:
+      name: "ARM NIGHT ZONES - Aktionen"
+      description: "Aktionen die ausgeführt werden sollen, wenn ein gültiger ARM NIGHT ZONES-Code eingegeben wurde"
+      default: []
+      selector:
+        action:
+    
+    arm_night_delay_seconds:
+      name: "ARM NIGHT ZONES - Exit Delay (Sekunden)"
+      description: "Wie lange soll das Keypad piepen bevor die Aktionen ausgeführt werden?"
+      default: 3
+      selector:
+        number:
+          min: 0
+          max: 60
+          unit_of_measurement: "s"
+    
+    arm_night_notification:
+      name: "ARM NIGHT ZONES - Benachrichtigung erstellen"
+      description: "Soll eine Benachrichtigung erstellt werden?"
+      default: true
+      selector:
+        boolean:
+    
+    emergency_codes:
+      name: "EMERGENCY - Codes"
+      description: "Liste von gültigen Codes für die EMERGENCY-Taste (SOS). Format: Komma-getrennt"
+      default: ""
+      selector:
+        text:
+    
+    emergency_actions:
+      name: "EMERGENCY - Aktionen"
+      description: "Aktionen die ausgeführt werden sollen, wenn ein gültiger EMERGENCY-Code eingegeben wurde"
+      default: []
+      selector:
+        action:
+    
+    emergency_delay_seconds:
+      name: "EMERGENCY - Exit Delay (Sekunden)"
+      description: "Wie lange soll das Keypad piepen bevor die Aktionen ausgeführt werden?"
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 60
+          unit_of_measurement: "s"
+    
+    emergency_notification:
+      name: "EMERGENCY - Benachrichtigung erstellen"
+      description: "Soll eine Benachrichtigung erstellt werden?"
+      default: true
+      selector:
+        boolean:
+    
+    invalid_code_notification:
+      name: "Benachrichtigung bei ungültigem Code"
+      description: "Soll eine Benachrichtigung erstellt werden, wenn ein ungültiger Code eingegeben wurde?"
+      default: true
+      selector:
+        boolean:
+
+trigger:
+  - platform: mqtt
+    topic: !input mqtt_topic
+
+condition:
+  - condition: template
+    value_template: >
+      {% set payload = trigger.payload_json %}
+      {{ payload.action is not none and payload.action_code is not none and 
+         payload.action | length > 0 and payload.action_code | length > 0 }}
+    alias: action & action_code ist nicht leer
+
+action:
+  - variables:
+      key_action: "{{ trigger.payload_json.action }}"
+      action_code: "{{ trigger.payload_json.action_code | int(default=0) }}"
+      action_transaction: "{{ trigger.payload_json.action_transaction }}"
+      mqtt_set_topic: "{{ trigger.topic }}/set"
+      
+      # Parse codes from comma-separated strings
+      disarm_codes_list: "{{ !input disarm_codes | replace(' ', '') | split(',') | map('int') | list }}"
+      arm_all_codes_list: "{{ !input arm_all_codes | replace(' ', '') | split(',') | map('int') | list }}"
+      arm_day_codes_list: "{{ !input arm_day_codes | replace(' ', '') | split(',') | map('int') | list }}"
+      arm_night_codes_list: "{{ !input arm_night_codes | replace(' ', '') | split(',') | map('int') | list }}"
+      emergency_codes_list: "{{ !input emergency_codes | replace(' ', '') | split(',') | map('int') | list }}"
+  
+  - alias: Choose-Block zur Tasten-Erkennung
+    choose:
+      # ==================== DISARM ====================
+      - conditions:
+          - condition: template
+            value_template: "{{ key_action == 'disarm' }}"
+        alias: "disarm (Schloss offen Taste)"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ action_code in disarm_codes_list }}"
+                alias: "Gültiger DISARM Code"
+                sequence:
+                  - alias: "MQTT: Erfolgs-Rückmeldung an Keypad geben"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "transaction": {{ action_transaction }},
+                            "mode": "disarm" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - alias: "MQTT: Keypad Modus entry_delay"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "entry_delay" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - delay:
+                      seconds: !input disarm_delay_seconds
+                  
+                  - alias: "DISARM Aktionen ausführen"
+                    choose: !input disarm_actions
+                  
+                  - alias: "MQTT: Keypad Modus auf disarm setzen"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "disarm" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - condition: template
+                    value_template: "{{ !input disarm_notification }}"
+                  
+                  - service: persistent_notification.create
+                    data:
+                      title: "Keypad DISARM Erfolg"
+                      message: "Code {{ action_code }} für DISARM akzeptiert. Keypad disarmed."
+            
+            default:
+              - alias: "MQTT: Fehler-Rückmeldung an Keypad geben"
+                service: mqtt.publish
+                data:
+                  topic: "{{ mqtt_set_topic }}"
+                  payload: |
+                    {
+                      "arm_mode": {
+                        "transaction": {{ action_transaction }},
+                        "mode": "invalid_code" 
+                      }
+                    }
+                  qos: 1
+              
+              - condition: template
+                value_template: "{{ !input invalid_code_notification }}"
+              
+              - service: persistent_notification.create
+                data:
+                  title: "Keypad DISARM Fehler"
+                  message: "Ungültiger Code {{ action_code }} für DISARM eingegeben!"
+      
+      # ==================== ARM ALL ZONES ====================
+      - conditions:
+          - condition: template
+            value_template: "{{ key_action == 'arm_all_zones' }}"
+        alias: "arm_all_zones (Schloss geschlossen Taste)"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ action_code in arm_all_codes_list }}"
+                alias: "Gültiger ARM ALL ZONES Code"
+                sequence:
+                  - alias: "MQTT: Erfolgs-Rückmeldung an Keypad geben"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "transaction": {{ action_transaction }},
+                            "mode": "arm_all_zones" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - alias: "MQTT: Keypad Modus exit_delay"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "exit_delay" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - delay:
+                      seconds: !input arm_all_delay_seconds
+                  
+                  - alias: "ARM ALL ZONES Aktionen ausführen"
+                    choose: !input arm_all_actions
+                  
+                  - alias: "MQTT: Keypad Modus auf arm_all_zones setzen"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "arm_all_zones" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - condition: template
+                    value_template: "{{ !input arm_all_notification }}"
+                  
+                  - service: persistent_notification.create
+                    data:
+                      title: "Keypad ARM ALL Erfolg"
+                      message: "Code {{ action_code }} für ARM ALL ZONES akzeptiert. Keypad armed."
+            
+            default:
+              - alias: "MQTT: Fehler-Rückmeldung an Keypad geben"
+                service: mqtt.publish
+                data:
+                  topic: "{{ mqtt_set_topic }}"
+                  payload: |
+                    {
+                      "arm_mode": {
+                        "transaction": {{ action_transaction }},
+                        "mode": "invalid_code" 
+                      }
+                    }
+                  qos: 1
+              
+              - condition: template
+                value_template: "{{ !input invalid_code_notification }}"
+              
+              - service: persistent_notification.create
+                data:
+                  title: "Keypad ARM ALL Fehler"
+                  message: "Ungültiger Code {{ action_code }} für ARM ALL ZONES eingegeben!"
+      
+      # ==================== ARM DAY ZONES ====================
+      - conditions:
+          - condition: template
+            value_template: "{{ key_action == 'arm_day_zones' }}"
+        alias: "arm_day_zones (Haus Taste)"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ action_code in arm_day_codes_list }}"
+                alias: "Gültiger ARM DAY ZONES Code"
+                sequence:
+                  - alias: "MQTT: Erfolgs-Rückmeldung an Keypad geben"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "transaction": {{ action_transaction }},
+                            "mode": "arm_day_zones" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - alias: "MQTT: Keypad Modus exit_delay"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "exit_delay" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - delay:
+                      seconds: !input arm_day_delay_seconds
+                  
+                  - alias: "ARM DAY ZONES Aktionen ausführen"
+                    choose: !input arm_day_actions
+                  
+                  - alias: "MQTT: Keypad Modus auf arm_day_zones setzen"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "arm_day_zones" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - condition: template
+                    value_template: "{{ !input arm_day_notification }}"
+                  
+                  - service: persistent_notification.create
+                    data:
+                      title: "Keypad ARM DAY Erfolg"
+                      message: "Code {{ action_code }} für ARM DAY ZONES akzeptiert. Keypad armed."
+            
+            default:
+              - alias: "MQTT: Fehler-Rückmeldung an Keypad geben"
+                service: mqtt.publish
+                data:
+                  topic: "{{ mqtt_set_topic }}"
+                  payload: |
+                    {
+                      "arm_mode": {
+                        "transaction": {{ action_transaction }},
+                        "mode": "invalid_code" 
+                      }
+                    }
+                  qos: 1
+              
+              - condition: template
+                value_template: "{{ !input invalid_code_notification }}"
+              
+              - service: persistent_notification.create
+                data:
+                  title: "Keypad ARM DAY Fehler"
+                  message: "Ungültiger Code {{ action_code }} für ARM DAY ZONES eingegeben!"
+      
+      # ==================== ARM NIGHT ZONES ====================
+      - conditions:
+          - condition: template
+            value_template: "{{ key_action == 'arm_night_zones' }}"
+        alias: "arm_night_zones (Mond Taste)"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ action_code in arm_night_codes_list }}"
+                alias: "Gültiger ARM NIGHT ZONES Code"
+                sequence:
+                  - alias: "MQTT: Erfolgs-Rückmeldung an Keypad geben"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "transaction": {{ action_transaction }},
+                            "mode": "arm_night_zones" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - alias: "MQTT: Keypad Modus exit_delay"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "exit_delay" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - delay:
+                      seconds: !input arm_night_delay_seconds
+                  
+                  - alias: "ARM NIGHT ZONES Aktionen ausführen"
+                    choose: !input arm_night_actions
+                  
+                  - alias: "MQTT: Keypad Modus auf arm_night_zones setzen"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "arm_night_zones" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - condition: template
+                    value_template: "{{ !input arm_night_notification }}"
+                  
+                  - service: persistent_notification.create
+                    data:
+                      title: "Keypad ARM NIGHT Erfolg"
+                      message: "Code {{ action_code }} für ARM NIGHT ZONES akzeptiert. Keypad armed."
+            
+            default:
+              - alias: "MQTT: Fehler-Rückmeldung an Keypad geben"
+                service: mqtt.publish
+                data:
+                  topic: "{{ mqtt_set_topic }}"
+                  payload: |
+                    {
+                      "arm_mode": {
+                        "transaction": {{ action_transaction }},
+                        "mode": "invalid_code" 
+                      }
+                    }
+                  qos: 1
+              
+              - condition: template
+                value_template: "{{ !input invalid_code_notification }}"
+              
+              - service: persistent_notification.create
+                data:
+                  title: "Keypad ARM NIGHT Fehler"
+                  message: "Ungültiger Code {{ action_code }} für ARM NIGHT ZONES eingegeben!"
+      
+      # ==================== EMERGENCY ====================
+      - conditions:
+          - condition: template
+            value_template: "{{ key_action == 'emergency' }}"
+        alias: "emergency (SOS Taste)"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ action_code in emergency_codes_list }}"
+                alias: "Gültiger EMERGENCY Code"
+                sequence:
+                  - alias: "MQTT: Erfolgs-Rückmeldung an Keypad geben"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "transaction": {{ action_transaction }},
+                            "mode": "emergency" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - alias: "MQTT: Keypad Modus exit_delay"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "exit_delay" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - delay:
+                      seconds: !input emergency_delay_seconds
+                  
+                  - alias: "EMERGENCY Aktionen ausführen"
+                    choose: !input emergency_actions
+                  
+                  - alias: "MQTT: Keypad Modus auf emergency setzen"
+                    service: mqtt.publish
+                    data:
+                      topic: "{{ mqtt_set_topic }}"
+                      payload: |
+                        {
+                          "arm_mode": {
+                            "mode": "emergency" 
+                          }
+                        }
+                      qos: 1
+                  
+                  - condition: template
+                    value_template: "{{ !input emergency_notification }}"
+                  
+                  - service: persistent_notification.create
+                    data:
+                      title: "Keypad EMERGENCY Erfolg"
+                      message: "Code {{ action_code }} für EMERGENCY akzeptiert!"
+            
+            default:
+              - alias: "MQTT: Fehler-Rückmeldung an Keypad geben"
+                service: mqtt.publish
+                data:
+                  topic: "{{ mqtt_set_topic }}"
+                  payload: |
+                    {
+                      "arm_mode": {
+                        "transaction": {{ action_transaction }},
+                        "mode": "invalid_code" 
+                      }
+                    }
+                  qos: 1
+              
+              - condition: template
+                value_template: "{{ !input invalid_code_notification }}"
+              
+              - service: persistent_notification.create
+                data:
+                  title: "Keypad EMERGENCY Fehler"
+                  message: "Ungültiger Code {{ action_code }} für EMERGENCY eingegeben!"
+    
+    # Default: Unbekannte Aktion
+    default:
+      - service: mqtt.publish
+        data:
+          topic: "{{ mqtt_set_topic }}"
+          payload: |
+            {
+              "arm_mode": {
+                "transaction": {{ action_transaction }},
+                "mode": "invalid_code" 
+              }
+            }
+          qos: 1
+        alias: "MQTT: Ungültig-Rückmeldung an Keypad geben"
+      
+      - condition: template
+        value_template: "{{ !input invalid_code_notification }}"
+      
+      - service: persistent_notification.create
+        data:
+          title: "Keypad Event nicht verarbeitet"
+          message: "Unbekannte Keypad-Aktion: {{ key_action }} mit Code {{ action_code }}."
+
+mode: parallel
+max: 5
