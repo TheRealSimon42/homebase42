@@ -14,7 +14,23 @@ Homebase42 ist eine umfassende Custom Integration für Home Assistant, die beson
 
 ## 💖 Unterstütze dieses Projekt
 
-Wenn dir Homebase42 hilft, unterstütze die Weiterentwicklung:
+### 🎬 Das absolute Minimum (kostet nix!)
+
+<p align="center">
+  <a href="https://youtube.com/@simon42?sub_confirmation=1">
+    <img src="https://img.shields.io/badge/YouTube-Kanal_abonnieren-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube abonnieren" />
+  </a>
+  <br/>
+  <em>Ein Klick, der mir wirklich hilft - und du verpasst keine Updates mehr! 🔔</em>
+  <br/>
+  <em>(Ja, ich weiß... du hast es auf der To-Do-Liste. Aber hey, jetzt ist ein guter Zeitpunkt! 😉)</em>
+</p>
+
+---
+
+### 💰 Finanzielle Unterstützung
+
+Wenn dir Homebase42 hilft und du die Weiterentwicklung unterstützen möchtest:
 
 <p align="center">
   <a href="https://youtube.com/@simon42/join">
@@ -27,6 +43,20 @@ Wenn dir Homebase42 hilft, unterstütze die Weiterentwicklung:
     <img src="https://img.shields.io/badge/Buy_Me_A_Coffee-Spende_einen_Kaffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee" />
   </a>
 </p>
+
+---
+
+### 🌐 Community & Austausch
+
+Du hast Fragen, Ideen oder möchtest dich mit anderen Homebase42-Nutzern austauschen?
+
+**👉 Besuche die [simon42 Community](https://community.simon42.com/)**
+
+Hier findest du:
+- Hilfe von anderen Nutzern und mir persönlich
+- Tipps & Tricks rund um Home Assistant
+- Frühe Einblicke in kommende Features
+- Einen Ort zum Fachsimpeln über Smart Home
 
 ---
 
