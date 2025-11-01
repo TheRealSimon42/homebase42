@@ -87,9 +87,9 @@
     }
   },
   "issues": {
-    "restart_required_templates": {
+    "restart_required": {
       "title": "Restart required",
-      "description": "The weather template configuration has been changed. Please restart Home Assistant to load the new packages."
+      "description": "Blueprints or templates have been installed or changed. Please restart Home Assistant for the changes to become visible in the UI."
     }
   },
   "entity": {

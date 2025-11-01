@@ -41,8 +41,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-def _copy_blueprints_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Copy blueprints to the blueprints folder based on configuration (sync version)."""
+def _copy_blueprints_sync(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Copy blueprints to the blueprints folder based on configuration (sync version).
+    
+    Returns True if blueprints were changed (added/removed/updated), False otherwise.
+    """
     # Source: integration blueprints folder
     blueprints_dir = Path(__file__).parent / "blueprints"
     
@@ -51,7 +54,9 @@ def _copy_blueprints_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
     
     if not blueprints_dir.exists():
         _LOGGER.warning("Blueprints folder not found in integration")
-        return
+        return False
+    
+    blueprints_changed = False
     
     try:
         # Create destination directory if it doesn't exist
@@ -70,6 +75,7 @@ def _copy_blueprints_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
                 if not dest_file.exists() or dest_file.read_text() != blueprint_file.read_text():
                     shutil.copy2(blueprint_file, dest_file)
                     _LOGGER.info("Copied core blueprint: %s", blueprint_file.name)
+                    blueprints_changed = True
                 else:
                     _LOGGER.debug("Core blueprint already up to date: %s", blueprint_file.name)
         
@@ -89,6 +95,7 @@ def _copy_blueprints_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
                         if not dest_file.exists() or dest_file.read_text() != blueprint_file.read_text():
                             shutil.copy2(blueprint_file, dest_file)
                             _LOGGER.info("Copied optional blueprint: %s", blueprint_filename)
+                            blueprints_changed = True
                         else:
                             _LOGGER.debug("Optional blueprint already up to date: %s", blueprint_filename)
                 else:
@@ -96,14 +103,21 @@ def _copy_blueprints_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
                     if dest_file.exists():
                         dest_file.unlink()
                         _LOGGER.info("Removed disabled optional blueprint: %s", blueprint_filename)
+                        blueprints_changed = True
                 
     except Exception as err:
         _LOGGER.error("Failed to manage blueprints: %s", err)
+        return False
+    
+    return blueprints_changed
 
 
-async def _async_copy_blueprints(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Copy blueprints to the blueprints folder based on configuration."""
-    await hass.async_add_executor_job(_copy_blueprints_sync, hass, entry)
+async def _async_copy_blueprints(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Copy blueprints to the blueprints folder based on configuration.
+    
+    Returns True if blueprints were changed, False otherwise.
+    """
+    return await hass.async_add_executor_job(_copy_blueprints_sync, hass, entry)
 
 
 def _copy_templates_sync(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -188,23 +202,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = {}
     
     # Copy blueprints to user's blueprint folder
-    await _async_copy_blueprints(hass, entry)
+    blueprints_changed = await _async_copy_blueprints(hass, entry)
     
     # Copy templates to user's packages folder
     templates_changed = await _async_copy_templates(hass, entry)
     
-    # If templates were changed, create a repair issue to notify user about restart
-    if templates_changed:
+    # If blueprints or templates were changed, create a repair issue to notify user about restart
+    if blueprints_changed or templates_changed:
         ir.async_create_issue(
             hass,
             DOMAIN,
             REPAIR_RESTART_REQUIRED,
             is_fixable=False,
             severity=ir.IssueSeverity.WARNING,
-            translation_key="restart_required_templates",
+            translation_key="restart_required",
         )
     else:
-        # Remove repair issue if it exists (templates are up to date)
+        # Remove repair issue if it exists (everything is up to date)
         ir.async_delete_issue(hass, DOMAIN, REPAIR_RESTART_REQUIRED)
     
     # Register update listener for options changes

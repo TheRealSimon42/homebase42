@@ -87,9 +87,9 @@
     }
   },
   "issues": {
-    "restart_required_templates": {
+    "restart_required": {
       "title": "Neustart erforderlich",
-      "description": "Die Wetter-Template-Konfiguration wurde geändert. Bitte starte Home Assistant neu, damit die neuen Packages geladen werden."
+      "description": "Blueprints oder Templates wurden installiert oder geändert. Bitte starte Home Assistant neu, damit die Änderungen in der UI sichtbar werden."
     }
   },
   "entity": {
