@@ -1,5 +1,5 @@
 blueprint:
-  name: Frient Keypad Code-Steuerung (MQTT)
+  name: s42 - Frient Keypad Code-Steuerung (MQTT)
   description: >
     Führt Aktionen basierend auf eingegebenem Code und Keypad-Taste aus.
     Unterstützt alle Tasten des Frient Keypads (disarm, arm_all_zones, arm_day_zones, arm_night_zones, emergency).

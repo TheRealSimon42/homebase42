@@ -1,5 +1,5 @@
 blueprint:
-  name: Persistente Benachrichtigung an Mobile
+  name: s42 - Persistente Benachrichtigung an Mobile
   description: Sende persistente Benachrichtigungen an die Mobile App, wenn sie hinzugefügt, aktualisiert oder entfernt werden
   domain: automation
   input:

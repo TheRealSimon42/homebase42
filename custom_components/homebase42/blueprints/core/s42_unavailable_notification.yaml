@@ -1,5 +1,5 @@
 blueprint:
-  name: Nicht verfügbare Entitäten Benachrichtigung
+  name: s42 - Nicht verfügbare Entitäten Benachrichtigung
   description: Benachrichtige, wenn Entitäten nicht verfügbar werden, mit Details zur Dauer der Nichtverfügbarkeit
   domain: automation
   input:
