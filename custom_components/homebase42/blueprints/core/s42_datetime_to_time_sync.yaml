@@ -1,0 +1,57 @@
+blueprint:
+  name: s42 - Synchronisiere Uhrzeit von Datum+Uhrzeit Helfer zu Uhrzeit-Helfer
+  description: |
+    Diese Blueprint erstellt eine Automation, die auf die Änderung eines
+    'input_datetime'-Helfers (mit Datum und Uhrzeit) lauscht. Sie extrahiert dann
+    nur die Uhrzeit und speichert sie in einem zweiten 'input_datetime'-Helfer, der
+    nur die Uhrzeit speichert.
+    
+    ⚠️ WICHTIG:
+    - Quell-Helfer muss 'Datum und Uhrzeit' haben (has_date: true, has_time: true)
+    - Ziel-Helfer muss 'Nur Uhrzeit' haben (has_date: false, has_time: true)
+  domain: automation
+  source_url: https://raw.githubusercontent.com/TheRealSimon42/home_assistant_templates/main/blueprint_automations/convert_datetime_helper_to_time_helper.yaml
+  input:
+    source_datetime_helper:
+      name: Quell-Helfer (Datum & Uhrzeit)
+      description: |
+        Wähle den input_datetime-Helfer aus, der Datum UND Uhrzeit enthält
+        und als Quelle dient.
+        WICHTIG: Muss beim Erstellen die Optionen 'Datum' UND 'Uhrzeit' aktiviert haben.
+      selector:
+        entity:
+          domain:
+          - input_datetime
+          multiple: false
+          reorder: false
+    target_time_helper:
+      name: Ziel-Helfer (Nur Uhrzeit)
+      description: |
+        Wähle den input_datetime-Helfer aus, der NUR die Uhrzeit speichern soll.
+        WICHTIG: Muss beim Erstellen NUR die Option 'Uhrzeit' aktiviert haben (KEIN Datum).
+      selector:
+        entity:
+          domain:
+          - input_datetime
+          multiple: false
+          reorder: false
+trigger:
+- platform: state
+  entity_id: !input source_datetime_helper
+action:
+- condition: template
+  value_template: >-
+    {{ state_attr(source_helper, 'has_date') == true and
+       state_attr(source_helper, 'has_time') == true and
+       state_attr(target_helper, 'has_date') == false and
+       state_attr(target_helper, 'has_time') == true }}
+  alias: Prüfe ob Helfer korrekt konfiguriert sind
+- service: input_datetime.set_datetime
+  target:
+    entity_id: !input target_time_helper
+  data:
+    time: '{{ trigger.to_state.state.split('' '')[1] }}'
+variables:
+  source_helper: !input source_datetime_helper
+  target_helper: !input target_time_helper
+mode: single
