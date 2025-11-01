@@ -7,12 +7,16 @@
         "data": {
           "battery_critical_threshold": "Critical battery level (%)",
           "battery_low_threshold": "Low battery level (%)",
-          "unavailable_notification_delay": "Notification delay (hours)"
+          "unavailable_notification_delay": "Notification delay (hours)",
+          "include_hidden_entities": "Include hidden entities",
+          "blueprint_frient_keypad": "Install Frient Keypad Blueprint"
         },
         "data_description": {
           "battery_critical_threshold": "Threshold at which batteries are reported as critical",
           "battery_low_threshold": "Threshold at which batteries are reported as low",
-          "unavailable_notification_delay": "Wait time before unavailable entities are reported"
+          "unavailable_notification_delay": "Wait time before unavailable entities are reported",
+          "include_hidden_entities": "Should hidden entities be included in monitoring?",
+          "blueprint_frient_keypad": "Provide blueprint for Frient Keypad code control (MQTT)"
         }
       },
       "init": {
@@ -21,7 +25,16 @@
         "data": {
           "battery_critical_threshold": "Critical battery level (%)",
           "battery_low_threshold": "Low battery level (%)",
-          "unavailable_notification_delay": "Notification delay (hours)"
+          "unavailable_notification_delay": "Notification delay (hours)",
+          "include_hidden_entities": "Include hidden entities",
+          "blueprint_frient_keypad": "Install Frient Keypad Blueprint"
+        },
+        "data_description": {
+          "battery_critical_threshold": "Threshold at which batteries are reported as critical",
+          "battery_low_threshold": "Threshold at which batteries are reported as low",
+          "unavailable_notification_delay": "Wait time before unavailable entities are reported",
+          "include_hidden_entities": "Should hidden entities be included in monitoring?",
+          "blueprint_frient_keypad": "Provide blueprint for Frient Keypad code control (MQTT)"
         }
       }
     },

@@ -18,10 +18,12 @@ from .const import (
     CONF_BATTERY_LOW_THRESHOLD,
     CONF_UNAVAILABLE_NOTIFICATION_DELAY,
     CONF_INCLUDE_HIDDEN_ENTITIES,
+    CONF_BLUEPRINT_FRIENT_KEYPAD,
     DEFAULT_BATTERY_CRITICAL,
     DEFAULT_BATTERY_LOW,
     DEFAULT_UNAVAILABLE_DELAY,
     DEFAULT_INCLUDE_HIDDEN_ENTITIES,
+    DEFAULT_BLUEPRINT_FRIENT_KEYPAD,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -64,6 +66,10 @@ class Homebase42ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(
                     CONF_INCLUDE_HIDDEN_ENTITIES,
                     default=DEFAULT_INCLUDE_HIDDEN_ENTITIES,
+                ): bool,
+                vol.Optional(
+                    CONF_BLUEPRINT_FRIENT_KEYPAD,
+                    default=DEFAULT_BLUEPRINT_FRIENT_KEYPAD,
                 ): bool,
             }
         )
@@ -108,7 +114,7 @@ class Homebase42OptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(
                     CONF_BATTERY_LOW_THRESHOLD,
                     default=options.get(CONF_BATTERY_LOW_THRESHOLD, DEFAULT_BATTERY_LOW),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
+                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=24)),
                 vol.Optional(
                     CONF_UNAVAILABLE_NOTIFICATION_DELAY,
                     default=options.get(
@@ -119,6 +125,12 @@ class Homebase42OptionsFlow(config_entries.OptionsFlow):
                     CONF_INCLUDE_HIDDEN_ENTITIES,
                     default=options.get(
                         CONF_INCLUDE_HIDDEN_ENTITIES, DEFAULT_INCLUDE_HIDDEN_ENTITIES
+                    ),
+                ): bool,
+                vol.Optional(
+                    CONF_BLUEPRINT_FRIENT_KEYPAD,
+                    default=options.get(
+                        CONF_BLUEPRINT_FRIENT_KEYPAD, DEFAULT_BLUEPRINT_FRIENT_KEYPAD
                     ),
                 ): bool,
             }

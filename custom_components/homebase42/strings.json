@@ -7,12 +7,16 @@
         "data": {
           "battery_critical_threshold": "Kritischer Batteriestand (%)",
           "battery_low_threshold": "Niedriger Batteriestand (%)",
-          "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)"
+          "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)",
+          "include_hidden_entities": "Versteckte Entitäten einbeziehen",
+          "blueprint_frient_keypad": "Frient Keypad Blueprint installieren"
         },
         "data_description": {
           "battery_critical_threshold": "Schwellwert ab dem Batterien als kritisch gemeldet werden",
           "battery_low_threshold": "Schwellwert ab dem Batterien als niedrig gemeldet werden",
-          "unavailable_notification_delay": "Wartezeit bevor nicht verfügbare Entitäten gemeldet werden"
+          "unavailable_notification_delay": "Wartezeit bevor nicht verfügbare Entitäten gemeldet werden",
+          "include_hidden_entities": "Sollen versteckte Entitäten in die Überwachung einbezogen werden?",
+          "blueprint_frient_keypad": "Blueprint für Frient Keypad Code-Steuerung (MQTT) bereitstellen"
         }
       },
       "init": {
@@ -21,7 +25,16 @@
         "data": {
           "battery_critical_threshold": "Kritischer Batteriestand (%)",
           "battery_low_threshold": "Niedriger Batteriestand (%)",
-          "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)"
+          "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)",
+          "include_hidden_entities": "Versteckte Entitäten einbeziehen",
+          "blueprint_frient_keypad": "Frient Keypad Blueprint installieren"
+        },
+        "data_description": {
+          "battery_critical_threshold": "Schwellwert ab dem Batterien als kritisch gemeldet werden",
+          "battery_low_threshold": "Schwellwert ab dem Batterien als niedrig gemeldet werden",
+          "unavailable_notification_delay": "Wartezeit bevor nicht verfügbare Entitäten gemeldet werden",
+          "include_hidden_entities": "Sollen versteckte Entitäten in die Überwachung einbezogen werden?",
+          "blueprint_frient_keypad": "Blueprint für Frient Keypad Code-Steuerung (MQTT) bereitstellen"
         }
       }
     },
