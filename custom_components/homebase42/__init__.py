@@ -15,6 +15,10 @@ from .const import (
     BLUEPRINTS_CORE,
     BLUEPRINTS_OPTIONAL,
     OPTIONAL_BLUEPRINTS,
+    TEMPLATES_OPTIONAL,
+    OPTIONAL_TEMPLATES,
+    CONF_WEATHER_ENTITY,
+    DEFAULT_WEATHER_ENTITY,
 )
 
 if TYPE_CHECKING:
@@ -35,8 +39,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-async def _async_copy_blueprints(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Copy blueprints to the blueprints folder based on configuration."""
+def _copy_blueprints_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Copy blueprints to the blueprints folder based on configuration (sync version)."""
     # Source: integration blueprints folder
     blueprints_dir = Path(__file__).parent / "blueprints"
     
@@ -95,12 +99,84 @@ async def _async_copy_blueprints(hass: HomeAssistant, entry: ConfigEntry) -> Non
         _LOGGER.error("Failed to manage blueprints: %s", err)
 
 
+async def _async_copy_blueprints(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Copy blueprints to the blueprints folder based on configuration."""
+    await hass.async_add_executor_job(_copy_blueprints_sync, hass, entry)
+
+
+def _copy_templates_sync(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Copy templates to the packages folder based on configuration (sync version)."""
+    # Source: integration templates folder
+    templates_dir = Path(__file__).parent / "templates"
+    
+    # Destination: HA config/packages/homebase42/
+    dest_dir = Path(hass.config.path("packages", "homebase42"))
+    
+    if not templates_dir.exists():
+        _LOGGER.debug("Templates folder not found in integration")
+        return
+    
+    try:
+        # Get options from config entry
+        options = entry.options
+        weather_entity = options.get(CONF_WEATHER_ENTITY, DEFAULT_WEATHER_ENTITY)
+        
+        # Handle OPTIONAL templates based on configuration
+        optional_dir = templates_dir / TEMPLATES_OPTIONAL
+        if optional_dir.exists():
+            for template_filename, config_key in OPTIONAL_TEMPLATES.items():
+                template_file = optional_dir / template_filename
+                
+                # Check if this optional template is enabled
+                is_enabled = options.get(config_key, False)
+                
+                if is_enabled:
+                    # Template is enabled -> copy it with weather entity replacement
+                    if template_file.exists():
+                        # Create destination directory if needed
+                        dest_dir.mkdir(parents=True, exist_ok=True)
+                        dest_file = dest_dir / template_filename
+                        
+                        # Read template content and replace placeholder
+                        content = template_file.read_text()
+                        content = content.replace("WEATHER_ENTITY_PLACEHOLDER", weather_entity)
+                        
+                        # Write to destination if different
+                        if not dest_file.exists() or dest_file.read_text() != content:
+                            dest_file.write_text(content)
+                            _LOGGER.info("Copied optional template: %s (using %s)", template_filename, weather_entity)
+                        else:
+                            _LOGGER.debug("Optional template already up to date: %s", template_filename)
+                else:
+                    # Template is disabled -> remove it if it exists
+                    dest_file = dest_dir / template_filename
+                    if dest_file.exists():
+                        dest_file.unlink()
+                        _LOGGER.info("Removed disabled optional template: %s", template_filename)
+                        
+                        # Remove directory if empty
+                        if dest_dir.exists() and not any(dest_dir.iterdir()):
+                            dest_dir.rmdir()
+                            _LOGGER.debug("Removed empty packages/homebase42 directory")
+                
+    except Exception as err:
+        _LOGGER.error("Failed to manage templates: %s", err)
+
+
+async def _async_copy_templates(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Copy templates to the packages folder based on configuration."""
+    await hass.async_add_executor_job(_copy_templates_sync, hass, entry)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Homebase42 from a config entry."""
     hass.data[DOMAIN][entry.entry_id] = {}
     
     # Copy blueprints to user's blueprint folder
     await _async_copy_blueprints(hass, entry)
+    
+    # Copy templates to user's packages folder
+    await _async_copy_templates(hass, entry)
     
     # Register update listener for options changes
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))

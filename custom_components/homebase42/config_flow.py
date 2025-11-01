@@ -10,6 +10,7 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import selector
 
 from .const import (
     DOMAIN,
@@ -18,12 +19,16 @@ from .const import (
     CONF_BATTERY_LOW_THRESHOLD,
     CONF_UNAVAILABLE_NOTIFICATION_DELAY,
     CONF_INCLUDE_HIDDEN_ENTITIES,
+    CONF_WEATHER_ENTITY,
     CONF_BLUEPRINT_FRIENT_KEYPAD,
+    CONF_TEMPLATE_WEATHER,
     DEFAULT_BATTERY_CRITICAL,
     DEFAULT_BATTERY_LOW,
     DEFAULT_UNAVAILABLE_DELAY,
     DEFAULT_INCLUDE_HIDDEN_ENTITIES,
+    DEFAULT_WEATHER_ENTITY,
     DEFAULT_BLUEPRINT_FRIENT_KEYPAD,
+    DEFAULT_TEMPLATE_WEATHER,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -71,6 +76,16 @@ class Homebase42ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_BLUEPRINT_FRIENT_KEYPAD,
                     default=DEFAULT_BLUEPRINT_FRIENT_KEYPAD,
                 ): bool,
+                vol.Optional(
+                    CONF_TEMPLATE_WEATHER,
+                    default=DEFAULT_TEMPLATE_WEATHER,
+                ): bool,
+                vol.Optional(
+                    CONF_WEATHER_ENTITY,
+                    default=DEFAULT_WEATHER_ENTITY,
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="weather")
+                ),
             }
         )
 
@@ -133,6 +148,18 @@ class Homebase42OptionsFlow(config_entries.OptionsFlow):
                         CONF_BLUEPRINT_FRIENT_KEYPAD, DEFAULT_BLUEPRINT_FRIENT_KEYPAD
                     ),
                 ): bool,
+                vol.Optional(
+                    CONF_TEMPLATE_WEATHER,
+                    default=options.get(
+                        CONF_TEMPLATE_WEATHER, DEFAULT_TEMPLATE_WEATHER
+                    ),
+                ): bool,
+                vol.Optional(
+                    CONF_WEATHER_ENTITY,
+                    default=options.get(CONF_WEATHER_ENTITY, DEFAULT_WEATHER_ENTITY),
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="weather")
+                ),
             }
         )
 

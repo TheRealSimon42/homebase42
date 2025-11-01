@@ -1,0 +1,111 @@
+####################
+###### Wetter ######
+####################
+# Homebase42 Wetter-Vorhersage Templates
+# Diese Datei wurde automatisch von der Homebase42 Integration installiert.
+# 
+# WICHTIG: Die Wetter-Entität wird automatisch durch die in der Integration
+# konfigurierte Entität ersetzt (Standard: weather.forecast_home)
+
+# Tägliche Wettervorhersagen
+template:
+  - trigger:
+      - platform: time_pattern
+        hours: /1
+    action:
+      - service: weather.get_forecasts
+        target:
+          entity_id:
+            - WEATHER_ENTITY_PLACEHOLDER
+        data:
+          type: daily
+        response_variable: tagesvorhersage
+    sensor:
+      - name: Wetter-Vorhersage (Täglich)
+        unique_id: s42_weather_forecast_daily
+        state: "{{ states('WEATHER_ENTITY_PLACEHOLDER') }}"
+        icon: mdi:calendar-today
+        attributes:
+          forecast: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast }}"
+      
+      # Template-Sensor für die Vorhersage des heutigen Tages
+      - name: Wetter-Vorhersage des heutigen Tages
+        unique_id: s42_forecast_today
+        state: "{{ now().isoformat() }}"
+        icon: mdi:weather-partly-cloudy
+        attributes:
+          condition: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[0].condition }}"
+          cloud_coverage: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[0].cloud_coverage }}"
+          temperature: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[0].temperature }}"
+          datetime: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[0].datetime }}"
+          precipitation: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[0].precipitation }}"
+      
+      # Template-Sensor für die Vorhersage des nächsten Tages
+      - name: Wetter-Vorhersage des nächsten Tages
+        unique_id: s42_forecast_next_1_day
+        state: "{{ now().isoformat() }}"
+        icon: mdi:weather-partly-cloudy
+        attributes:
+          condition: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].condition }}"
+          cloud_coverage: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].cloud_coverage }}"
+          temperature: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].temperature }}"
+          datetime: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].datetime }}"
+          precipitation: "{{ tagesvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].precipitation }}"
+
+  # Stündliche Wettervorhersagen
+  - trigger:
+      - platform: time_pattern
+        hours: /1
+    action:
+      - service: weather.get_forecasts
+        target:
+          entity_id:
+            - WEATHER_ENTITY_PLACEHOLDER
+        data:
+          type: hourly
+        response_variable: stundenvorhersage
+    sensor:
+      - name: Wetter-Vorhersage (Stündlich)
+        unique_id: s42_weather_forecast_hourly
+        state: "{{ states('WEATHER_ENTITY_PLACEHOLDER') }}"
+        icon: mdi:clock-outline
+        attributes:
+          forecast: "{{ stundenvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast }}"
+      
+      # Template-Sensor für die Vorhersage der nächsten Stunde
+      - name: Wetter-Vorhersage der nächsten Stunde
+        unique_id: s42_forecast_next_1_hour
+        state: "{{ now().isoformat() }}"
+        icon: mdi:clock-time-one-outline
+        attributes:
+          precipitation: "{{ stundenvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].precipitation }}"
+          condition: "{{ stundenvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].condition }}"
+          cloud_coverage: "{{ stundenvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].cloud_coverage }}"
+          temperature: "{{ stundenvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[1].temperature }}"
+      
+      # Template-Sensor für die aktuelle Niederschlagsmenge
+      - name: Regen-Menge der jetzigen Stunde
+        unique_id: s42_forecast_precipitation_now
+        state: "{{ stundenvorhersage['WEATHER_ENTITY_PLACEHOLDER'].forecast[0].precipitation }}"
+        unit_of_measurement: mm
+        icon: mdi:weather-rainy
+        device_class: precipitation
+
+  # Höchsttemperatur des Tages mit Uhrzeit
+  - sensor:
+      - name: "Höchsttemperatur des Tages (Uhrzeit)"
+        unique_id: s42_max_temperature_today_time
+        state: >
+          {% set midnight = (today_at() + timedelta(days=1)).isoformat() %}
+          {{ state_attr('sensor.wetter_vorhersage_stundlich', 'forecast')
+             | selectattr('temperature', 'eq', (state_attr('sensor.wetter_vorhersage_stundlich', 'forecast')
+             | selectattr('datetime', 'lt', midnight)
+             | map(attribute='temperature')
+             | list
+             | max))
+             | map(attribute='datetime')
+             | list
+             | min }}
+        availability: "{{ has_value('sensor.wetter_vorhersage_stundlich') }}"
+        icon: mdi:thermometer-high
+        device_class: timestamp
