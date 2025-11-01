@@ -8,9 +8,9 @@
           "battery_critical_threshold": "Kritischer Batteriestand (%)",
           "battery_low_threshold": "Niedriger Batteriestand (%)",
           "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)",
-          "include_hidden_entities": "Versteckte Entitäten einbeziehen",
-          "blueprint_frient_keypad": "Frient Keypad Blueprint installieren",
-          "template_weather": "Wetter-Templates installieren",
+          "include_hidden_entities": "Versteckte Entitäten inkludieren",
+          "blueprint_frient_keypad": "Blueprint: frient Keypad",
+          "template_weather": "Wetter Templates erstellen",
           "weather_entity": "Wetter-Entität"
         },
         "data_description": {
@@ -30,9 +30,9 @@
           "battery_critical_threshold": "Kritischer Batteriestand (%)",
           "battery_low_threshold": "Niedriger Batteriestand (%)",
           "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)",
-          "include_hidden_entities": "Versteckte Entitäten einbeziehen",
-          "blueprint_frient_keypad": "Frient Keypad Blueprint installieren",
-          "template_weather": "Wetter-Templates installieren",
+          "include_hidden_entities": "Versteckte Entitäten inkludieren",
+          "blueprint_frient_keypad": "Blueprint: frient Keypad",
+          "template_weather": "Wetter Templates erstellen",
           "weather_entity": "Wetter-Entität"
         },
         "data_description": {
