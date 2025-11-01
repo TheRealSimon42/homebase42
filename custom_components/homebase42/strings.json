@@ -9,17 +9,35 @@
           "battery_low_threshold": "Niedriger Batteriestand (%)",
           "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)",
           "include_hidden_entities": "Versteckte Entitäten inkludieren",
-          "blueprint_frient_keypad": "Blueprint: frient Keypad",
-          "template_weather": "Wetter Templates erstellen",
-          "weather_entity": "Wetter-Entität"
+          "configure_blueprints": "Optionale Blueprints auswählen",
+          "configure_weather": "Wetter Templates erstellen"
         },
         "data_description": {
           "battery_critical_threshold": "Schwellwert ab dem Batterien als kritisch gemeldet werden",
           "battery_low_threshold": "Schwellwert ab dem Batterien als niedrig gemeldet werden",
           "unavailable_notification_delay": "Wartezeit bevor nicht verfügbare Entitäten gemeldet werden",
           "include_hidden_entities": "Sollen versteckte Entitäten in die Überwachung einbezogen werden?",
-          "blueprint_frient_keypad": "Blueprint für Frient Keypad Code-Steuerung (MQTT) bereitstellen",
-          "template_weather": "Template-Sensoren für stündliche und tägliche Wettervorhersagen installieren",
+          "configure_blueprints": "Optionale Blueprints im nächsten Schritt auswählen",
+          "configure_weather": "Template-Sensoren für stündliche und tägliche Wettervorhersagen installieren"
+        }
+      },
+      "blueprints": {
+        "title": "Optionale Blueprints",
+        "description": "Wähle die Blueprints aus, die installiert werden sollen",
+        "data": {
+          "blueprint_frient_keypad": "Blueprint: frient Keypad"
+        },
+        "data_description": {
+          "blueprint_frient_keypad": "Blueprint für Frient Keypad Code-Steuerung (MQTT) bereitstellen"
+        }
+      },
+      "weather": {
+        "title": "Wetter-Konfiguration",
+        "description": "Wähle die Wetter-Entität für die Vorhersagen",
+        "data": {
+          "weather_entity": "Wetter-Entität"
+        },
+        "data_description": {
           "weather_entity": "Wetter-Entität die für die Vorhersagen verwendet werden soll"
         }
       },
@@ -31,17 +49,35 @@
           "battery_low_threshold": "Niedriger Batteriestand (%)",
           "unavailable_notification_delay": "Verzögerung für Benachrichtigungen (Stunden)",
           "include_hidden_entities": "Versteckte Entitäten inkludieren",
-          "blueprint_frient_keypad": "Blueprint: frient Keypad",
-          "template_weather": "Wetter Templates erstellen",
-          "weather_entity": "Wetter-Entität"
+          "configure_blueprints": "Optionale Blueprints auswählen",
+          "configure_weather": "Wetter Templates erstellen"
         },
         "data_description": {
           "battery_critical_threshold": "Schwellwert ab dem Batterien als kritisch gemeldet werden",
           "battery_low_threshold": "Schwellwert ab dem Batterien als niedrig gemeldet werden",
           "unavailable_notification_delay": "Wartezeit bevor nicht verfügbare Entitäten gemeldet werden",
           "include_hidden_entities": "Sollen versteckte Entitäten in die Überwachung einbezogen werden?",
-          "blueprint_frient_keypad": "Blueprint für Frient Keypad Code-Steuerung (MQTT) bereitstellen",
-          "template_weather": "Template-Sensoren für stündliche und tägliche Wettervorhersagen installieren",
+          "configure_blueprints": "Optionale Blueprints im nächsten Schritt auswählen",
+          "configure_weather": "Template-Sensoren für stündliche und tägliche Wettervorhersagen installieren"
+        }
+      },
+      "blueprints_options": {
+        "title": "Optionale Blueprints",
+        "description": "Wähle die Blueprints aus, die installiert werden sollen",
+        "data": {
+          "blueprint_frient_keypad": "Blueprint: frient Keypad"
+        },
+        "data_description": {
+          "blueprint_frient_keypad": "Blueprint für Frient Keypad Code-Steuerung (MQTT) bereitstellen"
+        }
+      },
+      "weather_options": {
+        "title": "Wetter-Konfiguration",
+        "description": "Wähle die Wetter-Entität für die Vorhersagen",
+        "data": {
+          "weather_entity": "Wetter-Entität"
+        },
+        "data_description": {
           "weather_entity": "Wetter-Entität die für die Vorhersagen verwendet werden soll"
         }
       }

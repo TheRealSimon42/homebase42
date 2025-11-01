@@ -9,17 +9,35 @@
           "battery_low_threshold": "Low battery level (%)",
           "unavailable_notification_delay": "Notification delay (hours)",
           "include_hidden_entities": "Include hidden entities",
-          "blueprint_frient_keypad": "Install Frient Keypad Blueprint",
-          "template_weather": "Install Weather Templates",
-          "weather_entity": "Weather Entity"
+          "configure_blueprints": "Select optional blueprints",
+          "configure_weather": "Install Weather Templates"
         },
         "data_description": {
           "battery_critical_threshold": "Threshold at which batteries are reported as critical",
           "battery_low_threshold": "Threshold at which batteries are reported as low",
           "unavailable_notification_delay": "Wait time before unavailable entities are reported",
           "include_hidden_entities": "Should hidden entities be included in monitoring?",
-          "blueprint_frient_keypad": "Provide blueprint for Frient Keypad code control (MQTT)",
-          "template_weather": "Install template sensors for hourly and daily weather forecasts",
+          "configure_blueprints": "Select optional blueprints in the next step",
+          "configure_weather": "Install template sensors for hourly and daily weather forecasts"
+        }
+      },
+      "blueprints": {
+        "title": "Optional Blueprints",
+        "description": "Select the blueprints to install",
+        "data": {
+          "blueprint_frient_keypad": "Blueprint: frient Keypad"
+        },
+        "data_description": {
+          "blueprint_frient_keypad": "Provide blueprint for Frient Keypad code control (MQTT)"
+        }
+      },
+      "weather": {
+        "title": "Weather Configuration",
+        "description": "Select the weather entity for forecasts",
+        "data": {
+          "weather_entity": "Weather Entity"
+        },
+        "data_description": {
           "weather_entity": "Weather entity to use for forecasts"
         }
       },
@@ -31,17 +49,35 @@
           "battery_low_threshold": "Low battery level (%)",
           "unavailable_notification_delay": "Notification delay (hours)",
           "include_hidden_entities": "Include hidden entities",
-          "blueprint_frient_keypad": "Install Frient Keypad Blueprint",
-          "template_weather": "Install Weather Templates",
-          "weather_entity": "Weather Entity"
+          "configure_blueprints": "Select optional blueprints",
+          "configure_weather": "Install Weather Templates"
         },
         "data_description": {
           "battery_critical_threshold": "Threshold at which batteries are reported as critical",
           "battery_low_threshold": "Threshold at which batteries are reported as low",
           "unavailable_notification_delay": "Wait time before unavailable entities are reported",
           "include_hidden_entities": "Should hidden entities be included in monitoring?",
-          "blueprint_frient_keypad": "Provide blueprint for Frient Keypad code control (MQTT)",
-          "template_weather": "Install template sensors for hourly and daily weather forecasts",
+          "configure_blueprints": "Select optional blueprints in the next step",
+          "configure_weather": "Install template sensors for hourly and daily weather forecasts"
+        }
+      },
+      "blueprints_options": {
+        "title": "Optional Blueprints",
+        "description": "Select the blueprints to install",
+        "data": {
+          "blueprint_frient_keypad": "Blueprint: frient Keypad"
+        },
+        "data_description": {
+          "blueprint_frient_keypad": "Provide blueprint for Frient Keypad code control (MQTT)"
+        }
+      },
+      "weather_options": {
+        "title": "Weather Configuration",
+        "description": "Select the weather entity for forecasts",
+        "data": {
+          "weather_entity": "Weather Entity"
+        },
+        "data_description": {
           "weather_entity": "Weather entity to use for forecasts"
         }
       }

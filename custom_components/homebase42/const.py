@@ -10,6 +10,10 @@ CONF_UNAVAILABLE_NOTIFICATION_DELAY = "unavailable_notification_delay"
 CONF_INCLUDE_HIDDEN_ENTITIES = "include_hidden_entities"
 CONF_WEATHER_ENTITY = "weather_entity"
 
+# Multi-step flow toggles
+CONF_CONFIGURE_BLUEPRINTS = "configure_blueprints"
+CONF_CONFIGURE_WEATHER = "configure_weather"
+
 # Optional Blueprints
 CONF_BLUEPRINT_FRIENT_KEYPAD = "blueprint_frient_keypad"
 
@@ -22,6 +26,8 @@ DEFAULT_BATTERY_LOW = 50
 DEFAULT_UNAVAILABLE_DELAY = 3  # hours
 DEFAULT_INCLUDE_HIDDEN_ENTITIES = False
 DEFAULT_WEATHER_ENTITY = "weather.forecast_home"
+DEFAULT_CONFIGURE_BLUEPRINTS = False
+DEFAULT_CONFIGURE_WEATHER = False
 DEFAULT_BLUEPRINT_FRIENT_KEYPAD = False
 DEFAULT_TEMPLATE_WEATHER = False
 
