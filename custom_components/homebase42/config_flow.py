@@ -17,9 +17,11 @@ from .const import (
     CONF_BATTERY_CRITICAL_THRESHOLD,
     CONF_BATTERY_LOW_THRESHOLD,
     CONF_UNAVAILABLE_NOTIFICATION_DELAY,
+    CONF_INCLUDE_HIDDEN_ENTITIES,
     DEFAULT_BATTERY_CRITICAL,
     DEFAULT_BATTERY_LOW,
     DEFAULT_UNAVAILABLE_DELAY,
+    DEFAULT_INCLUDE_HIDDEN_ENTITIES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -59,6 +61,10 @@ class Homebase42ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_UNAVAILABLE_NOTIFICATION_DELAY,
                     default=DEFAULT_UNAVAILABLE_DELAY,
                 ): vol.All(vol.Coerce(int), vol.Range(min=1, max=24)),
+                vol.Optional(
+                    CONF_INCLUDE_HIDDEN_ENTITIES,
+                    default=DEFAULT_INCLUDE_HIDDEN_ENTITIES,
+                ): bool,
             }
         )
 
@@ -81,7 +87,6 @@ class Homebase42OptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -110,6 +115,12 @@ class Homebase42OptionsFlow(config_entries.OptionsFlow):
                         CONF_UNAVAILABLE_NOTIFICATION_DELAY, DEFAULT_UNAVAILABLE_DELAY
                     ),
                 ): vol.All(vol.Coerce(int), vol.Range(min=1, max=24)),
+                vol.Optional(
+                    CONF_INCLUDE_HIDDEN_ENTITIES,
+                    default=options.get(
+                        CONF_INCLUDE_HIDDEN_ENTITIES, DEFAULT_INCLUDE_HIDDEN_ENTITIES
+                    ),
+                ): bool,
             }
         )
 

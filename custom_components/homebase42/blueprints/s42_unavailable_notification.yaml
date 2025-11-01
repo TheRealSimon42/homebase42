@@ -1,0 +1,35 @@
+blueprint:
+  name: Nicht verfügbare Entitäten Benachrichtigung
+  description: Benachrichtige, wenn Entitäten nicht verfügbar werden, mit Details zur Dauer der Nichtverfügbarkeit
+  domain: automation
+  input:
+    unavailable_sensor:
+      name: Sensor für nicht verfügbare Entitäten
+      description: Der binäre Sensor, der nicht verfügbare Entitäten erkennt (z.B. binary_sensor.homebase42_unavailable_entities)
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: problem
+    notification_target:
+      name: Benachrichtigungsziel
+      description: Wohin die Benachrichtigung gesendet werden soll
+      selector:
+        target:
+          entity:
+            domain: notify
+  trigger:
+    - platform: state
+      entity_id: !input unavailable_sensor
+      to: 'on'
+  action:
+    - service: notify.notify
+      target: !input notification_target
+      data:
+        title: "Nicht verfügbare Entitäten erkannt"
+        message: >
+          Die folgenden Entitäten sind derzeit nicht verfügbar:
+
+          {% set entities = state_attr(trigger.entity_id, 'entities') %}
+          {% for entity_id in entities %}
+          - {{ entity_id }} (nicht verfügbar seit {{ (now() - states[entity_id].last_changed).days }} Tagen, {{ ((now() - states[entity_id].last_changed).seconds // 3600) % 24 }} Stunden)
+          {% endfor %}

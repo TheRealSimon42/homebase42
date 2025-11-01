@@ -23,8 +23,10 @@ from .const import (
     NAME,
     CONF_BATTERY_CRITICAL_THRESHOLD,
     CONF_UNAVAILABLE_NOTIFICATION_DELAY,
+    CONF_INCLUDE_HIDDEN_ENTITIES,
     DEFAULT_BATTERY_CRITICAL,
     DEFAULT_UNAVAILABLE_DELAY,
+    DEFAULT_INCLUDE_HIDDEN_ENTITIES,
     ATTR_ENTITIES,
     ATTR_COUNT,
     ATTR_LAST_UPDATED,
@@ -103,15 +105,22 @@ class Homebase42UnavailableSensor(BinarySensorEntity, RestoreEntity):
             CONF_UNAVAILABLE_NOTIFICATION_DELAY, DEFAULT_UNAVAILABLE_DELAY
         )
         delay = timedelta(hours=delay_hours)
+        include_hidden = self._entry.options.get(
+            CONF_INCLUDE_HIDDEN_ENTITIES, DEFAULT_INCLUDE_HIDDEN_ENTITIES
+        )
         now = dt_util.utcnow()
-        
+
         # Iterate through all entities
         for state in self.hass.states.async_all():
             # Skip entities from this integration
             if state.entity_id.startswith(f"binary_sensor.{DOMAIN}_") or \
                state.entity_id.startswith(f"sensor.{DOMAIN}_"):
                 continue
-            
+
+            # Skip hidden entities if not configured to include them
+            if not include_hidden and state.attributes.get("hidden"):
+                continue
+
             # Check if entity is unavailable
             if state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN):
                 # Check if it has been unavailable for long enough
@@ -138,7 +147,7 @@ class Homebase42BatteryCriticalSensor(BinarySensorEntity, RestoreEntity):
 
     _attr_has_entity_name = True
     _attr_translation_key = "battery_critical"
-    _attr_device_class = BinarySensorDeviceClass.BATTERY
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
     _attr_icon = "mdi:battery-alert"
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -185,9 +194,16 @@ class Homebase42BatteryCriticalSensor(BinarySensorEntity, RestoreEntity):
         threshold = self._entry.options.get(
             CONF_BATTERY_CRITICAL_THRESHOLD, DEFAULT_BATTERY_CRITICAL
         )
-        
+        include_hidden = self._entry.options.get(
+            CONF_INCLUDE_HIDDEN_ENTITIES, DEFAULT_INCLUDE_HIDDEN_ENTITIES
+        )
+
         # Iterate through all sensor entities
         for state in self.hass.states.async_all("sensor"):
+            # Skip hidden entities if not configured to include them
+            if not include_hidden and state.attributes.get("hidden"):
+                continue
+
             # Check if it's a battery sensor
             if state.attributes.get("device_class") == "battery":
                 try:
