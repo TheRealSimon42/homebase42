@@ -10,7 +10,7 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.helpers import area_registry as ar, device_registry as dr, entity_registry as er
-from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.event import async_call_later, async_track_time_interval
 
 from .const import (
     DOMAIN,
@@ -206,7 +206,8 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
         async def _schedule_initial_export(event) -> None:
             """Schedule the initial export after startup."""
             _LOGGER.info("Scheduling initial state export in %s to %s", EXPORT_STARTUP_DELAY, export_path)
-            hass.async_call_later(
+            async_call_later(
+                hass,
                 EXPORT_STARTUP_DELAY.total_seconds(),
                 _handle_automatic_export,
             )
