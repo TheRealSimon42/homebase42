@@ -1,0 +1,25 @@
+# Services for Homebase42
+
+export_states:
+  name: Export States
+  description: Export all entity states to a JSON file for LLM context
+  fields:
+    output_path:
+      name: Output Path
+      description: Path where to save the export file (relative to config directory or absolute). Defaults to 'homebase42_state_export.json'
+      example: "www/ha_state_export.json"
+      default: "homebase42_state_export.json"
+      selector:
+        text:
+    include_attributes:
+      name: Include Attributes
+      description: Include additional entity attributes in the export
+      default: true
+      selector:
+        boolean:
+    include_context:
+      name: Include Context
+      description: Include entity registry information (category, platform, timestamps, etc.)
+      default: true
+      selector:
+        boolean:

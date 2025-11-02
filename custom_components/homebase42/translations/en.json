@@ -92,6 +92,26 @@
       "description": "Blueprints or templates have been installed or changed. Please restart Home Assistant for the changes to become visible in the UI."
     }
   },
+  "services": {
+    "export_states": {
+      "name": "Export States",
+      "description": "Export all entity states to a JSON file for LLM context",
+      "fields": {
+        "output_path": {
+          "name": "Output Path",
+          "description": "Path where to save the export file (relative to config directory or absolute). Default is 'homebase42_state_export.json'"
+        },
+        "include_attributes": {
+          "name": "Include Attributes",
+          "description": "Include additional entity attributes in the export"
+        },
+        "include_context": {
+          "name": "Include Context",
+          "description": "Include entity registry information (category, platform, timestamps, etc.)"
+        }
+      }
+    }
+  },
   "entity": {
     "binary_sensor": {
       "unavailable_entities": {

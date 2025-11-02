@@ -87,6 +87,13 @@ Hier findest du:
 - `sensor.homebase42_unavailable_count` - Anzahl nicht verfügbarer Entitäten
 - `sensor.homebase42_battery_low_count` - Anzahl Batterien mit niedrigem Stand
 
+### 🤖 LLM State Export
+- **Automatischer Export** - Alle 60 Minuten + 5 Minuten nach Neustart
+- **State Export Service** - Manueller Export auf Abruf möglich
+- **Automatische Areazuordnung** - Entities werden automatisch ihren Bereichen zugeordnet
+- **Flexible Konfiguration** - Wähle aus was exportiert werden soll (Attribute, Kontext, etc.)
+- **Perfekt für AI/LLM** - Optimiertes Format für Sprachmodelle wie ChatGPT, Claude, etc.
+
 ## 📦 Installation
 
 ### HACS (empfohlen)
@@ -170,6 +177,98 @@ Die Dashboard-Strategy kann über den grafischen Editor konfiguriert werden:
 2. Klicke auf **Bearbeiten**
 3. Klicke auf das ⚙️ Symbol oben rechts
 4. Passe Bereiche, Sortierung und Filter an
+
+### LLM State Export
+
+Homebase42 exportiert **automatisch** alle Entity-States in eine JSON-Datei:
+- **Alle 60 Minuten** wird ein neuer Export erstellt
+- **5 Minuten nach jedem Neustart** von Home Assistant
+- Standardpfad: `config/homebase42_state_export.json`
+
+#### Manueller Export (Service)
+
+Du kannst den Export auch manuell triggern:
+
+```yaml
+service: homebase42.export_states
+data:
+  output_path: "www/ha_state_export.json"
+  include_attributes: true
+  include_context: true
+```
+
+**Tipp**: Wenn du den Export im `www/` Ordner speicherst, ist er über `/local/ha_state_export.json` im Browser erreichbar!
+
+#### Service Parameter
+
+- **output_path** (optional): Pfad zur Export-Datei (relativ zum config-Verzeichnis oder absolut)
+  - Standard: `homebase42_state_export.json`
+  - Beispiel: `www/ha_state_export.json` (erreichbar via `/local/ha_state_export.json`)
+  
+- **include_attributes** (optional, default: true): Zusätzliche Entity-Attribute einbeziehen
+  
+- **include_context** (optional, default: true): Entity-Registry-Informationen (Kategorie, Plattform, Zeitstempel, etc.)
+
+#### Export Format
+
+```json
+{
+  "export_timestamp": "2025-11-02T00:00:00.000000+01:00",
+  "home_assistant_version": "2025.10.0",
+  "total_entities": 1082,
+  "states": [
+    {
+      "entity_id": "light.wohnzimmer",
+      "state": "on",
+      "domain": "light",
+      "friendly_name": "Wohnzimmer Licht",
+      "device_class": "",
+      "unit": "",
+      "supported_features": 40,
+      "area": "Wohnzimmer",
+      "entity_category": null,
+      "disabled": false,
+      "hidden": false,
+      "platform": "hue",
+      "last_changed": "2025-11-02T12:00:00+01:00",
+      "last_updated": "2025-11-02T12:00:00+01:00",
+      "attributes": {
+        "brightness": 255,
+        "color_mode": "xy"
+      }
+    }
+  ],
+  "summary": {
+    "by_domain": {
+      "light": 45,
+      "switch": 32,
+      "sensor": 156
+    },
+    "by_area": {
+      "Wohnzimmer": 12,
+      "Küche": 8,
+      "Schlafzimmer": 15
+    }
+  }
+}
+```
+
+#### Verwendung mit LLMs
+
+Nachdem du den Export erstellt hast, kannst du die JSON-Datei an ein LLM übergeben:
+
+**Beispiel Prompt:**
+```
+Hier ist der aktuelle Status meines Smart Home Systems:
+[JSON-Datei einfügen]
+
+Bitte analysiere den Status und sage mir:
+1. Welche Lichter sind aktuell an?
+2. Welche Fenster sind offen?
+3. Gibt es Probleme oder Warnungen?
+```
+
+Das LLM kann dann direkt mit den Entity-IDs, Bereichen und Status arbeiten und dir konkrete Antworten geben!
 
 ## 🤝 Beitragen
 

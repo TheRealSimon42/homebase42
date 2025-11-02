@@ -7,6 +7,18 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt
+- **LLM State Export** - Automatischer State-Export für AI/LLM Integration
+  - **Automatischer Export**: Alle 60 Minuten + 5 Minuten nach Neustart
+  - Service `homebase42.export_states` für manuellen Export
+  - Exportiert alle Entity-States als JSON für LLM-Kontext
+  - Automatische Areazuordnung über Entity- und Device-Registry
+  - Flexible Konfiguration (Attribute, Kontext, etc.)
+  - Optimiertes Format für AI/LLM Integration
+  - Event-Trigger nach erfolgreichem Export
+  - Deutsche und englische Übersetzungen
+  - Umfangreiche Dokumentation mit Beispielen
+
 ### Geplant
 - Energy sensor monitoring mit Benachrichtigungen
 - Performance metrics sensor

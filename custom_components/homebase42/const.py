@@ -9,6 +9,9 @@ CONF_BATTERY_LOW_THRESHOLD = "battery_low_threshold"
 CONF_UNAVAILABLE_NOTIFICATION_DELAY = "unavailable_notification_delay"
 CONF_INCLUDE_HIDDEN_ENTITIES = "include_hidden_entities"
 CONF_WEATHER_ENTITY = "weather_entity"
+CONF_EXPORT_STATES_ENABLED = "export_states_enabled"
+CONF_EXPORT_STATES_PATH = "export_states_path"
+CONF_EXPORT_STATES_INTERVAL = "export_states_interval"
 
 # Multi-step flow toggles
 CONF_CONFIGURE_BLUEPRINTS = "configure_blueprints"
@@ -30,6 +33,9 @@ DEFAULT_CONFIGURE_BLUEPRINTS = False
 DEFAULT_CONFIGURE_WEATHER = False
 DEFAULT_BLUEPRINT_FRIENT_KEYPAD = False
 DEFAULT_TEMPLATE_WEATHER = False
+DEFAULT_EXPORT_STATES_ENABLED = True
+DEFAULT_EXPORT_STATES_PATH = "homebase42_state_export.json"
+DEFAULT_EXPORT_STATES_INTERVAL = 60  # minutes
 
 # Attributes
 ATTR_ENTITIES = "entities"

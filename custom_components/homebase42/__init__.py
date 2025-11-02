@@ -22,6 +22,7 @@ from .const import (
     DEFAULT_WEATHER_ENTITY,
     REPAIR_RESTART_REQUIRED,
 )
+from .services import async_setup_services, async_unload_services
 
 if TYPE_CHECKING:
     from homeassistant.helpers.typing import ConfigType
@@ -37,6 +38,9 @@ PLATFORMS: list[Platform] = [
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Homebase42 component."""
     hass.data.setdefault(DOMAIN, {})
+    
+    # Services will be registered when a config entry is set up
+    # (we need the config entry for options)
 
     return True
 
@@ -221,6 +225,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # Remove repair issue if it exists (everything is up to date)
         ir.async_delete_issue(hass, DOMAIN, REPAIR_RESTART_REQUIRED)
     
+    # Register services (only once for the first config entry)
+    if len([e for e in hass.config_entries.async_entries(DOMAIN)]) == 1:
+        await async_setup_services(hass, entry)
+    
     # Register update listener for options changes
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
     
@@ -239,6 +247,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         hass.data[DOMAIN].pop(entry.entry_id)
+        
+        # Unload services if no more config entries
+        if not hass.data[DOMAIN]:
+            await async_unload_services(hass)
     
     return unload_ok
 
