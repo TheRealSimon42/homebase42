@@ -51,22 +51,22 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
             area_reg = ar.async_get(hass)
             device_reg = dr.async_get(hass)
             
-            # Build export data
-            export_data = {
-                "export_timestamp": datetime.now().isoformat(),
-                "home_assistant_version": hass.config.as_dict().get("version", "unknown"),
-                "total_entities": 0,
-                "states": [],
-            }
-            
             # Add summary by domain and area
             summary = {
                 "by_domain": {},
                 "by_area": {},
             }
             
+            # Collect floors and areas structure
+            floors_and_areas = {}
+            for area in area_reg.async_list_areas():
+                floor_id = area.floor_id or "no_floor"
+                if floor_id not in floors_and_areas:
+                    floors_and_areas[floor_id] = []
+                floors_and_areas[floor_id].append(area.name)
+            
             # Collect all states
-            states_list = []
+            states_by_domain = {}
             for state in hass.states.async_all():
                 entity_data = {
                     "entity_id": state.entity_id,
@@ -128,19 +128,30 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
                     if filtered_attrs:
                         entity_data["attributes"] = filtered_attrs
                 
-                states_list.append(entity_data)
+                # Group by domain
+                domain = state.domain
+                if domain not in states_by_domain:
+                    states_by_domain[domain] = []
+                states_by_domain[domain].append(entity_data)
                 
                 # Update summary
-                domain = state.domain
                 summary["by_domain"][domain] = summary["by_domain"].get(domain, 0) + 1
                 summary["by_area"][area_name] = summary["by_area"].get(area_name, 0) + 1
             
-            # Sort by entity_id for consistent output
-            states_list.sort(key=lambda x: x["entity_id"])
+            # Sort entities within each domain by entity_id
+            for domain in states_by_domain:
+                states_by_domain[domain].sort(key=lambda x: x["entity_id"])
             
-            export_data["states"] = states_list
-            export_data["total_entities"] = len(states_list)
-            export_data["summary"] = summary
+            # Build export data with summary first
+            total_entities = sum(len(entities) for entities in states_by_domain.values())
+            export_data = {
+                "export_timestamp": datetime.now().isoformat(),
+                "home_assistant_version": hass.config.as_dict().get("version", "unknown"),
+                "total_entities": total_entities,
+                "summary": summary,
+                "floors_and_areas": floors_and_areas,
+                "states_by_domain": states_by_domain,
+            }
             
             # Determine output file path
             if output_path.startswith("/"):
@@ -167,7 +178,7 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
             
             _LOGGER.info(
                 "Successfully exported %d entities to %s",
-                len(states_list),
+                total_entities,
                 file_path,
             )
             
@@ -176,7 +187,7 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
                 f"{DOMAIN}_state_export_complete",
                 {
                     "file_path": str(file_path),
-                    "entity_count": len(states_list),
+                    "entity_count": total_entities,
                     "timestamp": export_data["export_timestamp"],
                 },
             )
