@@ -9,7 +9,7 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, callback
-from homeassistant.helpers import area_registry as ar, device_registry as dr, entity_registry as er
+from homeassistant.helpers import area_registry as ar, device_registry as dr, entity_registry as er, floor_registry as fr
 from homeassistant.helpers.event import async_call_later, async_track_time_interval
 
 from .const import (
@@ -50,6 +50,7 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
             entity_reg = er.async_get(hass)
             area_reg = ar.async_get(hass)
             device_reg = dr.async_get(hass)
+            floor_reg = fr.async_get(hass)
             
             # Add summary by domain and area
             summary = {
@@ -57,13 +58,36 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
                 "by_area": {},
             }
             
-            # Collect floors and areas structure
+            # Collect floors and areas structure with IDs and names
             floors_and_areas = {}
+            for floor in floor_reg.async_list_floors():
+                floors_and_areas[floor.floor_id] = {
+                    "floor_id": floor.floor_id,
+                    "name": floor.name,
+                    "level": floor.level,
+                    "areas": []
+                }
+            
+            # Add areas to their respective floors
             for area in area_reg.async_list_areas():
+                area_info = {
+                    "area_id": area.area_id,
+                    "name": area.name,
+                }
+                
                 floor_id = area.floor_id or "no_floor"
-                if floor_id not in floors_and_areas:
-                    floors_and_areas[floor_id] = []
-                floors_and_areas[floor_id].append(area.name)
+                if floor_id == "no_floor":
+                    # Create "no_floor" entry if it doesn't exist
+                    if floor_id not in floors_and_areas:
+                        floors_and_areas[floor_id] = {
+                            "floor_id": "no_floor",
+                            "name": "No Floor",
+                            "level": None,
+                            "areas": []
+                        }
+                
+                if floor_id in floors_and_areas:
+                    floors_and_areas[floor_id]["areas"].append(area_info)
             
             # Collect all states
             states_by_domain = {}
