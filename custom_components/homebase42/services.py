@@ -112,14 +112,19 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
                 
                 # Add all attributes if requested
                 if include_attributes:
-                    # Filter out large attributes and internal ones
-                    filtered_attrs = {
-                        k: v for k, v in attributes.items()
-                        if k not in ["entity_picture", "friendly_name", "icon", "device_class", 
-                                    "unit_of_measurement", "supported_features"]
-                        and not isinstance(v, (bytes, bytearray))
-                        and k != "attribution"
-                    }
+                    # Filter out large attributes and internal ones, convert datetime to string
+                    filtered_attrs = {}
+                    for k, v in attributes.items():
+                        if k in ["entity_picture", "friendly_name", "icon", "device_class", 
+                                "unit_of_measurement", "supported_features", "attribution"]:
+                            continue
+                        if isinstance(v, (bytes, bytearray)):
+                            continue
+                        # Convert datetime objects to ISO format strings
+                        if isinstance(v, datetime):
+                            v = v.isoformat()
+                        filtered_attrs[k] = v
+                    
                     if filtered_attrs:
                         entity_data["attributes"] = filtered_attrs
                 
@@ -145,16 +150,20 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
                 # Relative to config directory
                 file_path = Path(hass.config.path(output_path))
             
-            # Ensure directory exists
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            
             # Add .json extension if not present
             if file_path.suffix != ".json":
                 file_path = file_path.with_suffix(".json")
             
-            # Write to file
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(export_data, f, indent=2, ensure_ascii=False)
+            # Write to file using executor to avoid blocking
+            def _write_json_file():
+                """Write JSON file synchronously in executor."""
+                # Ensure directory exists
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                with open(file_path, "w", encoding="utf-8") as f:
+                    json.dump(export_data, f, indent=2, ensure_ascii=False, default=str)
+            
+            await hass.async_add_executor_job(_write_json_file)
             
             _LOGGER.info(
                 "Successfully exported %d entities to %s",
