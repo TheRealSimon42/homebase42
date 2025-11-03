@@ -71,7 +71,7 @@ async def async_setup_services(hass: HomeAssistant, entry: ConfigEntry) -> None:
             # Add areas to their respective floors
             for area in area_reg.async_list_areas():
                 area_info = {
-                    "area_id": area.area_id,
+                    "area_id": area.id,
                     "name": area.name,
                 }
                 
