@@ -12,6 +12,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_time_interval
@@ -114,6 +115,9 @@ class Homebase42UnavailableCountSensor(SensorEntity, RestoreEntity):
             CONF_INCLUDE_HIDDEN_ENTITIES, DEFAULT_INCLUDE_HIDDEN_ENTITIES
         )
         now_time = dt_util.utcnow()
+        
+        # Get entity registry to check visibility
+        entity_reg = er.async_get(self.hass)
 
         # Iterate through all entities
         for state in self.hass.states.async_all():
@@ -123,8 +127,10 @@ class Homebase42UnavailableCountSensor(SensorEntity, RestoreEntity):
                 continue
 
             # Skip hidden entities if not configured to include them
-            if not include_hidden and state.attributes.get("hidden"):
-                continue
+            if not include_hidden:
+                entity_entry = entity_reg.async_get(state.entity_id)
+                if entity_entry and entity_entry.hidden_by is not None:
+                    continue
 
             # Check if entity is unavailable
             if state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN):
@@ -208,12 +214,17 @@ class Homebase42BatteryLowCountSensor(SensorEntity, RestoreEntity):
         include_hidden = self._entry.options.get(
             CONF_INCLUDE_HIDDEN_ENTITIES, DEFAULT_INCLUDE_HIDDEN_ENTITIES
         )
+        
+        # Get entity registry to check visibility
+        entity_reg = er.async_get(self.hass)
 
         # Iterate through all sensor entities
         for state in self.hass.states.async_all("sensor"):
             # Skip hidden entities if not configured to include them
-            if not include_hidden and state.attributes.get("hidden"):
-                continue
+            if not include_hidden:
+                entity_entry = entity_reg.async_get(state.entity_id)
+                if entity_entry and entity_entry.hidden_by is not None:
+                    continue
 
             # Check if it's a battery sensor
             if state.attributes.get("device_class") == "battery":
